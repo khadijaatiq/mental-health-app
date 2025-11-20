@@ -17,7 +17,7 @@ public class AnalyticsService {
 
     @Autowired
     public AnalyticsService(MoodService moodService, JournalService journalService,
-                            StressService stressService, GoalService goalService) {
+            StressService stressService, GoalService goalService) {
         this.moodService = moodService;
         this.journalService = journalService;
         this.stressService = stressService;
@@ -74,14 +74,13 @@ public class AnalyticsService {
                 "thisWeekStress", thisWeekStress != null ? thisWeekStress : 0.0,
                 "lastWeekStress", lastWeekStress != null ? lastWeekStress : 0.0,
                 "moodTrend", calculateTrend(lastWeekMood, thisWeekMood),
-                "stressTrend", calculateTrend(lastWeekStress, thisWeekStress)
-        );
+                "stressTrend", calculateTrend(lastWeekStress, thisWeekStress));
     }
 
     private String calculateTrend(Double old, Double current) {
-        if (old == null || current == null) return "neutral";
-        if (current > old) return "improving";
-        if (current < old) return "declining";
-        return "stable";
+        if (old == null || current == null || old == 0)
+            return "neutral";
+        double change = ((current - old) / old) * 100;
+        return String.format("%.1f%%", change);
     }
 }

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Stress Tracker - MindTrack</title>
+    <title>Daily Check-In - MindTrack</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -79,8 +79,6 @@
             color: var(--text-muted);
         }
 
-        input[type="range"],
-        input[type="date"],
         textarea {
             width: 100%;
             padding: 0.75rem;
@@ -91,6 +89,8 @@
             font-size: 1rem;
             box-sizing: border-box;
             font-family: inherit;
+            min-height: 100px;
+            resize: vertical;
         }
 
         button {
@@ -108,51 +108,37 @@
             background-color: var(--primary-dark);
         }
 
-        .stress-list {
+        .checkin-list {
             list-style: none;
             padding: 0;
         }
 
-        .stress-item {
+        .checkin-item {
             background-color: rgba(255, 255, 255, 0.03);
             padding: 1.5rem;
             border-radius: 0.5rem;
             margin-bottom: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
-        .stress-info h3 {
-            margin: 0 0 0.5rem 0;
-            font-size: 1.1rem;
-        }
-
-        .stress-meta {
+        .checkin-date {
             font-size: 0.875rem;
             color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: block;
         }
 
-        .stress-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
+        .qa-pair {
+            margin-bottom: 1rem;
+        }
+
+        .question {
             font-weight: 600;
-            font-size: 0.875rem;
+            color: #818cf8;
+            margin-bottom: 0.25rem;
         }
 
-        .stress-low {
-            background-color: rgba(16, 185, 129, 0.2);
-            color: #34d399;
-        }
-
-        .stress-med {
-            background-color: rgba(251, 191, 36, 0.2);
-            color: #fbbf24;
-        }
-
-        .stress-high {
-            background-color: rgba(239, 68, 68, 0.2);
-            color: #f87171;
+        .answer {
+            color: var(--text);
         }
     </style>
 </head>
@@ -167,104 +153,119 @@
             <a href="/goals">Goals</a>
             <a href="/habits">Habits</a>
             <a href="/stress">Stress</a>
+            <a href="/checkin">Check-In</a>
             <a href="#" onclick="logout()">Logout</a>
         </div>
     </nav>
 
     <div class="container">
         <div class="card">
-            <h2>Log Stress Level</h2>
-            <form id="stressForm">
-                <div class="form-group">
-                    <label for="stressLevel">Stress Level (1-10)</label>
-                    <input type="range" id="stressLevel" min="1" max="10" value="5"
-                        oninput="this.nextElementSibling.value = this.value">
-                    <output>5</output>
+            <h2>Daily Reflection</h2>
+            <form id="checkinForm">
+                <div id="questionsContainer">
+                    <!-- Questions will be loaded here -->
                 </div>
-                <div class="form-group">
-                    <label for="date">Date</label>
-                    <input type="date" id="date" required>
-                </div>
-                <div class="form-group">
-                    <label for="notes">Notes (Optional)</label>
-                    <textarea id="notes" placeholder="What's causing your stress?"></textarea>
-                </div>
-                <button type="submit">Log Stress</button>
+                <button type="submit">Save Check-In</button>
             </form>
         </div>
 
         <div class="card">
-            <h2>Recent Logs</h2>
-            <ul id="stressList" class="stress-list">
-                <!-- Stress logs will be loaded here -->
+            <h2>Past Check-Ins</h2>
+            <ul id="checkinList" class="checkin-list">
+                <!-- Check-ins will be loaded here -->
             </ul>
         </div>
     </div>
 
     <script>
-        // Set default date to today
-        document.getElementById('date').valueAsDate = new Date();
-
         function logout() {
             document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             window.location.href = '/login';
         }
 
-        function getStressClass(level) {
-            if (level <= 3) return 'stress-low';
-            if (level <= 7) return 'stress-med';
-            return 'stress-high';
+        async function loadQuestions() {
+            try {
+                const response = await fetch('/api/checkins/questions');
+                if (response.ok) {
+                    const data = await response.json();
+                    const container = document.getElementById('questionsContainer');
+                    container.innerHTML = data.questions.map((q, index) => `
+                        <div class="form-group">
+                            <label>${q}</label>
+                            <textarea name="answer${index + 1}" required></textarea>
+                            <input type="hidden" name="question${index + 1}" value="${q}">
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading questions:', error);
+            }
         }
 
-        async function loadStress() {
+        async function loadCheckIns() {
             try {
-                const response = await fetch('/api/stress');
+                const response = await fetch('/api/checkins');
                 if (response.ok) {
-                    const stressList = await response.json();
-                    const list = document.getElementById('stressList');
-                    list.innerHTML = stressList.map(stress => `
-                        <li class="stress-item">
-                            <div class="stress-info">
-                                <span class="stress-badge ${getStressClass(stress.stressLevel)}">Level: ${stress.stressLevel}</span>
-                                <p style="margin: 0.5rem 0 0 0">${stress.notes || ''}</p>
+                    const checkIns = await response.json();
+                    const list = document.getElementById('checkinList');
+                    list.innerHTML = checkIns.map(checkIn => `
+                        <li class="checkin-item">
+                            <span class="checkin-date">${checkIn.date}</span>
+                            <div class="qa-pair">
+                                <div class="question">${checkIn.question1}</div>
+                                <div class="answer">${checkIn.answer1}</div>
                             </div>
-                            <div class="stress-meta">
-                                <span>${stress.date}</span>
+                            <div class="qa-pair">
+                                <div class="question">${checkIn.question2}</div>
+                                <div class="answer">${checkIn.answer2}</div>
+                            </div>
+                            <div class="qa-pair">
+                                <div class="question">${checkIn.question3}</div>
+                                <div class="answer">${checkIn.answer3}</div>
                             </div>
                         </li>
                     `).join('');
                 }
             } catch (error) {
-                console.error('Error loading stress logs:', error);
+                console.error('Error loading check-ins:', error);
             }
         }
 
-        document.getElementById('stressForm').addEventListener('submit', async (e) => {
+        document.getElementById('checkinForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const stressLevel = document.getElementById('stressLevel').value;
-            const date = document.getElementById('date').value;
-            const notes = document.getElementById('notes').value;
+            const formData = new FormData(e.target);
+
+            const checkIn = {
+                date: new Date().toISOString().split('T')[0],
+                question1: formData.get('question1'),
+                answer1: formData.get('answer1'),
+                question2: formData.get('question2'),
+                answer2: formData.get('answer2'),
+                question3: formData.get('question3'),
+                answer3: formData.get('answer3')
+            };
 
             try {
-                const response = await fetch('/api/stress', {
+                const response = await fetch('/api/checkins', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ stressLevel: parseInt(stressLevel), date, notes })
+                    body: JSON.stringify(checkIn)
                 });
 
                 if (response.ok) {
-                    loadStress();
+                    loadCheckIns();
+                    loadQuestions(); // Refresh questions for next time (optional)
                     e.target.reset();
-                    document.getElementById('date').valueAsDate = new Date();
                 }
             } catch (error) {
-                console.error('Error saving stress log:', error);
+                console.error('Error saving check-in:', error);
             }
         });
 
-        loadStress();
+        loadQuestions();
+        loadCheckIns();
     </script>
 </body>
 

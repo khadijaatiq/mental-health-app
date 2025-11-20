@@ -18,15 +18,15 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     public AuthService(UserRepository userRepository,
-                       PasswordEncoder encoder,
-                       JwtUtil jwtUtil) {
+            PasswordEncoder encoder,
+            JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.jwtUtil = jwtUtil;
     }
 
     // Register a new user
-    public String register(User user) throws Exception {
+    public String register(User user, String adminCode) throws Exception {
         if (userRepository.existsByUsername(user.getUsername())) {
             throw new Exception("Username already exists");
         }
@@ -37,9 +37,15 @@ public class AuthService {
         // Encode password
         user.setPassword(encoder.encode(user.getPassword()));
 
-        // Assign default role
+        // Assign roles
         Set<String> roles = new HashSet<>();
-        roles.add("USER");
+        roles.add("USER"); // Default role
+
+        // Check for admin code
+        if ("admin-secret".equals(adminCode)) {
+            roles.add("ADMIN");
+        }
+
         user.setRoles(roles);
 
         userRepository.save(user);
@@ -62,7 +68,7 @@ public class AuthService {
         return jwtUtil.generateToken(new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                user.getRoles().stream().map(r -> new org.springframework.security.core.authority.SimpleGrantedAuthority(r)).toList()
-        ));
+                user.getRoles().stream()
+                        .map(r -> new org.springframework.security.core.authority.SimpleGrantedAuthority(r)).toList()));
     }
 }

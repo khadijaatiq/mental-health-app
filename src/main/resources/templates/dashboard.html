@@ -1,10 +1,199 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<html xmlns:th="http://www.thymeleaf.org">
 
+<head>
+    <title>Dashboard - MindTrack</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        .navbar {
+            background-color: var(--surface);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, #4f46e5, #9333ea);
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-card h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+        }
+
+        .welcome-card p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--surface);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo">MindTrack</div>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="welcome-card">
+            <h2>Welcome Back!</h2>
+            <p>Track your mental well-being and stay on top of your goals.</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Mood Tracker</h3>
+                <p>Log your daily mood and track emotional patterns over time.</p>
+                <a href="/mood" class="btn">Log Mood</a>
+            </div>
+            <div class="card">
+                <h3>Journal</h3>
+                <p>Write down your thoughts and feelings in a private space.</p>
+                <a href="/journal" class="btn">Write Entry</a>
+            </div>
+            <div class="card">
+                <h3>Goals</h3>
+                <p>Set and track personal goals for your mental wellness journey.</p>
+                <a href="/goals" class="btn">View Goals</a>
+            </div>
+            <div class="card">
+                <h3>Habit Tracker</h3>
+                <p>Build positive habits and track your daily streaks.</p>
+                <a href="/habits" class="btn">Track Habits</a>
+            </div>
+            <div class="card">
+                <h3>Stress Monitor</h3>
+                <p>Log stress levels and identify triggers to manage them better.</p>
+                <a href="/stress" class="btn">Log Stress</a>
+            </div>
+            <div class="card">
+                <h3>Daily Check-In</h3>
+                <p>Take a moment to reflect with a quick 3-question self-assessment.</p>
+                <a href="/checkin" class="btn">Start Check-In</a>
+            </div>
+            <div class="card">
+                <h3>Support Board</h3>
+                <p>Share your experiences and connect with others anonymously.</p>
+                <a href="/board" class="btn">Visit Board</a>
+            </div>
+            <div class="card">
+                <h3>Resources</h3>
+                <p>Explore curated articles and videos for your mental well-being.</p>
+                <a href="/resources" class="btn">Browse Resources</a>
+            </div>
+            <div class="card">
+                <h3>Analytics</h3>
+                <p>Visualize your progress with detailed charts and insights.</p>
+                <a href="/analytics" class="btn">View Insights</a>
+            </div>
+            <div class="card">
+                <h3>Export Data</h3>
+                <p>Download your data as a PDF report or CSV file.</p>
+                <a href="/export" class="btn">Export Data</a>
+            </div>
+            <div class="card">
+                <h3>Admin Portal</h3>
+                <p>Manage users, content, and view crisis alerts.</p>
+                <a href="/admin" class="btn">Admin Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = '/login';
+        }
+    </script>
 </body>
+
 </html>

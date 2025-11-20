@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Admin Dashboard - MindTrack</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        .navbar {
+            background-color: var(--surface);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: var(--surface);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .list-container {
+            background-color: var(--surface);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .list-item {
+            background-color: rgba(255, 255, 255, 0.03);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-danger {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .badge-warning {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .item-content {
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--text-muted);
+            color: var(--text-muted);
+
+            <div class="stats-grid"><div class="stat-card"><div class="stat-label">Total Posts</div><div class="stat-value" id="totalPosts">-</div></div><div class="stat-card"><div class="stat-label">Active Alerts</div><div class="stat-value" id="totalAlerts">-</div></div><div class="stat-card"><div class="stat-label">Flagged Posts</div><div class="stat-value" id="flaggedCount">-</div></div></div><div class="grid-2"><div><h3 class="section-title">⚠️ Crisis Alerts</h3><div class="list-container" id="alertsList">< !-- Alerts will be loaded here --></div></div><div><h3 class="section-title">🚩 Flagged Content</h3><div class="list-container" id="flaggedList">< !-- Flagged posts will be loaded here --></div></div></div></div><script>function logout() {
+                document.cookie="JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                window.location.href='/login';
+            }
+
+            async function loadStats() {
+                try {
+                    const response=await fetch('/api/admin/stats');
+
+                    if (response.ok) {
+                        const data=await response.json();
+                        document.getElementById('totalPosts').textContent=data.totalPosts;
+                        document.getElementById('totalAlerts').textContent=data.totalAlerts;
+                    }
+                }
+
+                catch (error) {
+                    console.error('Error loading stats:', error);
+                }
+            }
+
+            async function loadAlerts() {
+                try {
+                    const response=await fetch('/api/admin/alerts/recent');
+
+                    if (response.ok) {
+                        const alerts=await response.json();
+                        const list=document.getElementById('alertsList');
+
+                        if (alerts.length===0) {
+                            list.innerHTML='<p style="color: var(--text-muted); text-align: center;">No recent alerts.</p>';
+                            return;
+                        }
+
+                        list.innerHTML=alerts.map(alert=> ` <div class="list-item" > <div class="item-header" > <span class="badge badge-danger" >$ {
+                                alert.severity
+                            }
+
+                            </span> <span>$ {
+                                new Date(alert.timestamp).toLocaleDateString()
+                            }
+
+                            </span> </div> <div class="item-content" > <strong>User ID: $ {
+                                alert.user ? alert.user.id : 'Unknown'
+                            }
+
+                            </strong><br> $ {
+                                alert.message
+                            }
+
+                            </div> </div> `).join('');
+                    }
+                }
+
+                catch (error) {
+                    console.error('Error loading alerts:', error);
+                }
+            }
+
+            async function loadFlaggedPosts() {
+                try {
+                    const response=await fetch('/api/admin/posts/flagged');
+
+                    if (response.ok) {
+                        const posts=await response.json();
+                        const list=document.getElementById('flaggedList');
+                        document.getElementById('flaggedCount').textContent=posts.length;
+
+                        if (posts.length===0) {
+                            list.innerHTML='<p style="color: var(--text-muted); text-align: center;">No flagged posts.</p>';
+                            return;
+                        }
+
+                        list.innerHTML=posts.map(post=> ` <div class="list-item" id="post-${post.id}" > <div class="item-header" > <span class="badge badge-warning" >Flagged</span> <span>$ {
+                                post.date
+                            }
+
+                            </span> </div> <div class="item-content" > $ {
+                                post.content
+                            }
+
+                            <div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--danger);" > Reason: $ {
+                                post.flagReason || 'No reason provided'
+                            }
+
+                            </div> </div> <div class="actions" > <button class="btn-success" onclick="unflagPost(${post.id})" >Keep (Unflag)</button> <button class="btn-danger" onclick="deletePost(${post.id})" >Delete</button> </div> </div> `).join('');
+                    }
+                }
+
+                catch (error) {
+                    console.error('Error loading flagged posts:', error);
+                }
+            }
+
+            async function unflagPost(id) {
+                if ( !confirm('Are you sure you want to unflag this post?')) return;
+
+                try {
+                    const response=await fetch(`/api/admin/posts/$ {
+                            id
+                        }
+
+                        /unflag`, {
+                        method: 'PATCH'
+                    });
+
+                if (response.ok) {
+                    loadFlaggedPosts();
+                }
+            }
+
+            catch (error) {
+                console.error('Error unflagging post:', error);
+            }
+        }
+
+        async function deletePost(id) {
+            if ( !confirm('Are you sure you want to delete this post permanently?')) return;
+
+            try {
+                const response=await fetch(`/api/admin/posts/$ {
+                        id
+                    }
+
+                    `, {
+                    method: 'DELETE'
+                });
+
+            if (response.ok) {
+                loadFlaggedPosts();
+                loadStats(); // Update total posts count
+            }
+        }
+
+        catch (error) {
+            console.error('Error deleting post:', error);
+        }
+        }
+
+        loadStats();
+        loadAlerts();
+        loadFlaggedPosts();
+        </script></body></html>

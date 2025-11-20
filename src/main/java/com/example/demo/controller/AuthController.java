@@ -19,9 +19,17 @@ public class AuthController {
 
     // Register endpoint
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
         try {
-            String message = authService.register(user);
+            User user = new User();
+            user.setName(body.get("name"));
+            user.setUsername(body.get("username"));
+            user.setEmail(body.get("email"));
+            user.setPassword(body.get("password"));
+
+            String adminCode = body.get("adminCode");
+
+            String message = authService.register(user, adminCode);
             return ResponseEntity.ok(Map.of("message", message));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -30,7 +38,8 @@ public class AuthController {
 
     // Login endpoint
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> body,
+            jakarta.servlet.http.HttpServletResponse response) {
         try {
             String username = body.get("username");
             String password = body.get("password");
@@ -40,6 +49,14 @@ public class AuthController {
             }
 
             String token = authService.login(username, password);
+
+            jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("JWT", token);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(false); // Set to true in production
+            cookie.setPath("/");
+            cookie.setMaxAge(24 * 60 * 60); // 1 day
+            response.addCookie(cookie);
+
             return ResponseEntity.ok(Map.of("token", token));
 
         } catch (Exception e) {

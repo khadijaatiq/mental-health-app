@@ -2,6 +2,10 @@ package com.example.demo.scheduler;
 
 import com.example.demo.model.Notification;
 import com.example.demo.service.NotificationService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import java.util.List;
@@ -36,20 +40,14 @@ public class NotificationScheduler {
         }
     }
 
+    @Autowired
+    private JavaMailSender mailSender; // Requires spring-boot-starter-mail
+
     private void sendNotification(Notification notification) {
-        // TODO: Implement actual notification sending logic
-        // For now, just log it
-        String type = notification.getType();
-        String message = notification.getMessage();
-        String username = notification.getUser().getUsername();
-        String email = notification.getUser().getEmail();
-
-        System.out.println("=== NOTIFICATION ===");
-        System.out.println("Type: " + type);
-        System.out.println("To: " + username + " (" + email + ")");
-        System.out.println("Message: " + message);
-        System.out.println("===================");
-
-
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(notification.getUser().getEmail());
+        message.setSubject("MindTrack Reminder: " + notification.getType());
+        message.setText(notification.getMessage());
+        mailSender.send(message);
     }
 }

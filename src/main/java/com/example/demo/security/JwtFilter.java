@@ -29,13 +29,24 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
+        String token = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+            token = authHeader.substring(7);
+        } else if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("JWT".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (token != null) {
 
             try {
                 String username = jwtUtil.extractUsername(token);
@@ -48,16 +59,15 @@ public class JwtFilter extends OncePerRequestFilter {
                         user.getPassword(),
                         user.getRoles().stream()
                                 .map(SimpleGrantedAuthority::new)
-                                .collect(Collectors.toList())
-                ))) {
+                                .collect(Collectors.toList())))) {
 
                     Set<SimpleGrantedAuthority> authorities = user.getRoles()
                             .stream()
                             .map(SimpleGrantedAuthority::new)
                             .collect(Collectors.toSet());
 
-                    UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(user, null, authorities);
+                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null,
+                            authorities);
 
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }

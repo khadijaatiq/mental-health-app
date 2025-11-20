@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.model.*;
 import com.example.demo.repository.AlertRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
@@ -15,9 +16,12 @@ public class CrisisDetectionService {
     private final JournalService journalService;
     private final AlertRepository alertRepository;
 
+    @Value("${app.crisis.keywords}")
+    private List<String> keywords;
+
     @Autowired
     public CrisisDetectionService(MoodService moodService, StressService stressService,
-                                  JournalService journalService, AlertRepository alertRepository) {
+            JournalService journalService, AlertRepository alertRepository) {
         this.moodService = moodService;
         this.stressService = stressService;
         this.journalService = journalService;
@@ -60,11 +64,11 @@ public class CrisisDetectionService {
     }
 
     private boolean containsCrisisKeywords(String text) {
-        if (text == null) return false;
+        if (text == null || keywords == null)
+            return false;
         String lowerText = text.toLowerCase();
-        String[] keywords = {"suicide", "self-harm", "hopeless", "worthless", "end it all", "give up"};
         for (String keyword : keywords) {
-            if (lowerText.contains(keyword)) {
+            if (lowerText.contains(keyword.toLowerCase())) {
                 return true;
             }
         }

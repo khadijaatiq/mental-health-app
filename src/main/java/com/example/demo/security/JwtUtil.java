@@ -12,7 +12,8 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    private final String secret = "mysecretkey12345"; // keep this safe, ideally in application.properties
+    @org.springframework.beans.factory.annotation.Value("${jwt.secret}")
+    private String secret;
 
     private final long jwtExpirationMs = 86400000; // 24 hours
 

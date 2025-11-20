@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import com.example.demo.model.Notification;
 import com.example.demo.model.User;
 import com.example.demo.service.NotificationService;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +21,8 @@ public class NotificationController {
     }
 
     @PostMapping
-    public ResponseEntity<Notification> create(@RequestBody Map<String, Object> body, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Notification> create(@RequestBody Map<String, Object> body,
+            @AuthenticationPrincipal User user) {
         String message = (String) body.get("message");
         String type = (String) body.get("type");
         String scheduledTimeStr = (String) body.get("scheduledTime");
