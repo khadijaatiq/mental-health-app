@@ -21,6 +21,7 @@ public class MoodService {
     }
 
     public Mood createMood(Mood mood) {
+        validateMood(mood);
         return moodRepository.save(mood);
     }
 
@@ -50,15 +51,21 @@ public class MoodService {
         return results.stream()
                 .collect(Collectors.toMap(
                         arr -> (String) arr[0],
-                        arr -> (Long) arr[1]
-                ));
+                        arr -> (Long) arr[1]));
     }
 
     public Mood updateMood(Mood mood) {
+        validateMood(mood);
         return moodRepository.save(mood);
     }
 
     public void deleteMood(Long id) {
         moodRepository.deleteById(id);
+    }
+
+    private void validateMood(Mood mood) {
+        if (mood.getIntensity() < 1 || mood.getIntensity() > 10) {
+            throw new IllegalArgumentException("Intensity must be between 1 and 10");
+        }
     }
 }

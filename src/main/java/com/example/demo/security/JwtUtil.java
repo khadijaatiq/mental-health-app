@@ -19,7 +19,13 @@ public class JwtUtil {
 
     // Generate token using UserDetails
     public String generateToken(UserDetails userDetails) {
+        java.util.Map<String, Object> claims = new java.util.HashMap<>();
+        claims.put("roles", userDetails.getAuthorities().stream()
+                .map(org.springframework.security.core.GrantedAuthority::getAuthority)
+                .collect(java.util.stream.Collectors.toList()));
+
         return Jwts.builder()
+                .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))

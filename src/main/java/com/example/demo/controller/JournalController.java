@@ -1,25 +1,32 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.JournalDTO;
+import com.example.demo.model.EmotionTag;
 import com.example.demo.model.Journal;
 import com.example.demo.model.User;
+import com.example.demo.service.EmotionTagService;
 import com.example.demo.service.JournalService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/journals")
 public class JournalController {
 
     private final JournalService journalService;
+    private final EmotionTagService emotionTagService;
 
-    public JournalController(JournalService journalService) {
+    public JournalController(JournalService journalService, EmotionTagService emotionTagService) {
         this.journalService = journalService;
+        this.emotionTagService = emotionTagService;
     }
 
     @PostMapping
@@ -27,8 +34,18 @@ public class JournalController {
         Journal journal = new Journal();
         journal.setUser(user);
         journal.setEntryText(journalDTO.getEntryText());
-        journal.setEmotionTag(journalDTO.getEmotionTag());
         journal.setDate(journalDTO.getDate());
+
+        if (journalDTO.getEmotionTags() != null) {
+            Set<EmotionTag> tags = new HashSet<>();
+            for (String tagName : journalDTO.getEmotionTags()) {
+                EmotionTag tag = emotionTagService.getTagByName(tagName);
+                if (tag != null) {
+                    tags.add(tag);
+                }
+            }
+            journal.setEmotionTags(tags);
+        }
 
         Journal saved = journalService.createJournal(journal);
         return ResponseEntity.ok(saved);
@@ -73,11 +90,23 @@ public class JournalController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Journal> update(@PathVariable Long id, @RequestBody JournalDTO journalDTO, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Journal> update(@PathVariable Long id, @RequestBody JournalDTO journalDTO,
+            @AuthenticationPrincipal User user) {
         Journal journal = journalService.getJournalById(id);
         if (journal != null && journal.getUser().getId().equals(user.getId())) {
             journal.setEntryText(journalDTO.getEntryText());
-            journal.setEmotionTag(journalDTO.getEmotionTag());
+
+            if (journalDTO.getEmotionTags() != null) {
+                Set<EmotionTag> tags = new HashSet<>();
+                for (String tagName : journalDTO.getEmotionTags()) {
+                    EmotionTag tag = emotionTagService.getTagByName(tagName);
+                    if (tag != null) {
+                        tags.add(tag);
+                    }
+                }
+                journal.setEmotionTags(tags);
+            }
+
             Journal updated = journalService.updateJournal(journal);
             return ResponseEntity.ok(updated);
         }

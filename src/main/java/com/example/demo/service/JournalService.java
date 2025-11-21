@@ -47,7 +47,7 @@ public class JournalService {
     }
 
     public List<Journal> getJournalsByUserAndEmotion(User user, String emotionTag) {
-        return journalRepository.findByUserAndEmotionTag(user, emotionTag);
+        return journalRepository.findByUserAndEmotionTags_Name(user, emotionTag);
     }
 
     public Map<String, Long> getEmotionDistribution(User user) {
@@ -55,8 +55,7 @@ public class JournalService {
         return results.stream()
                 .collect(Collectors.toMap(
                         arr -> (String) arr[0],
-                        arr -> (Long) arr[1]
-                ));
+                        arr -> (Long) arr[1]));
     }
 
     public Journal updateJournal(Journal journal) {

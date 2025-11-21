@@ -6,33 +6,20 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
+@Getter
+@Setter
 @Entity
+@Table(name="goal")
 public class Goal {
-
-    @Setter
-    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Setter
-    @Getter
     private String title;
-
-    @Setter
-    @Getter
     private String description;
-    @Setter
-    @Getter
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    @Setter
-    @Getter
     private LocalDate targetDate;
-    @Setter
-    @Getter
     private String status; // NEW: pending, completed
     private LocalDateTime createdAt;
     public void onCreate() {

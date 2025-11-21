@@ -13,11 +13,18 @@ import java.util.Optional;
 @Repository
 public interface JournalRepository extends JpaRepository<Journal, Long> {
     List<Journal> findByUser(User user);
-    List<Journal> findByUserOrderByDateDesc(User user);
-    Optional<Journal> findByUserAndDate(User user, LocalDate date);
-    List<Journal> findByUserAndDateBetween(User user, LocalDate start, LocalDate end);
-    List<Journal> findByUserAndEmotionTag(User user, String emotionTag);
 
-    @Query("SELECT j.emotionTag, COUNT(j) FROM Journal j WHERE j.user = :user GROUP BY j.emotionTag")
+    List<Journal> findByUserOrderByDateDesc(User user);
+
+    Optional<Journal> findByUserAndDate(User user, LocalDate date);
+
+    List<Journal> findByUserAndDateBetween(User user, LocalDate start, LocalDate end);
+
+    List<Journal> findByUserAndEmotionTags_Name(User user, String tagName);
+
+    @Query("SELECT t.name, COUNT(j) FROM Journal j JOIN j.emotionTags t WHERE j.user = :user GROUP BY t.name")
     List<Object[]> countEmotionsByUser(@Param("user") User user);
+
+    @Query("SELECT j FROM Journal j JOIN j.emotionTags t WHERE j.user = :user AND t.name = :tagName")
+    List<Journal> findByEmotionTag(@Param("user") User user, @Param("tagName") String tagName);
 }

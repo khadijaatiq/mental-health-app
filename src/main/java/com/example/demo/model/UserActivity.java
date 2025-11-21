@@ -4,16 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "stress_levels")
-public class Stress {
+@Table(name = "user_activities")
+public class UserActivity {
 
-    // Getters and Setters
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,18 +20,12 @@ public class Stress {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private int stressLevel; // 1-10 scale
-
-    private LocalDate date;
-
-    private String notes;
-
-    private LocalDateTime createdAt;
+    private String action; // e.g., "LOGIN", "POST_CREATED"
+    private String details; // Optional details
+    private LocalDateTime timestamp;
 
     @PrePersist
     public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        if (this.date == null) this.date = LocalDate.now();
+        this.timestamp = LocalDateTime.now();
     }
-
 }

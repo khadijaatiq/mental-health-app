@@ -192,152 +192,173 @@
             background-color: var(--success);
             color: white;
         }
+    </style>
+</head>
 
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--text-muted);
-            color: var(--text-muted);
+<body>
+    <nav class="navbar">
+        <div class="logo">MindTrack Admin</div>
+        <div class="nav-links">
+            <a href="/dashboard">User Dashboard</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
 
-            <div class="stats-grid"><div class="stat-card"><div class="stat-label">Total Posts</div><div class="stat-value" id="totalPosts">-</div></div><div class="stat-card"><div class="stat-label">Active Alerts</div><div class="stat-value" id="totalAlerts">-</div></div><div class="stat-card"><div class="stat-label">Flagged Posts</div><div class="stat-value" id="flaggedCount">-</div></div></div><div class="grid-2"><div><h3 class="section-title">⚠️ Crisis Alerts</h3><div class="list-container" id="alertsList">< !-- Alerts will be loaded here --></div></div><div><h3 class="section-title">🚩 Flagged Content</h3><div class="list-container" id="flaggedList">< !-- Flagged posts will be loaded here --></div></div></div></div><script>function logout() {
-                document.cookie="JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                window.location.href='/login';
+    <div class="container">
+        <div class="header">
+            <h2>Dashboard Overview</h2>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Posts</div>
+                <div class="stat-value" id="totalPosts">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Alerts</div>
+                <div class="stat-value" id="totalAlerts">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Flagged Posts</div>
+                <div class="stat-value" id="flaggedCount">-</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <h3 class="section-title">⚠️ Crisis Alerts</h3>
+                <div class="list-container" id="alertsList">
+                    <!-- Alerts will be loaded here -->
+                </div>
+            </div>
+            <div>
+                <h3 class="section-title">🚩 Flagged Content</h3>
+                <div class="list-container" id="flaggedList">
+                    <!-- Flagged posts will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = '/login';
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/admin/stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('totalPosts').textContent = data.postCount;
+                    document.getElementById('totalAlerts').textContent = data.alertCount;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
             }
+        }
 
-            async function loadStats() {
-                try {
-                    const response=await fetch('/api/admin/stats');
+        async function loadAlerts() {
+            try {
+                const response = await fetch('/api/admin/alerts/recent');
+                if (response.ok) {
+                    const alerts = await response.json();
+                    const list = document.getElementById('alertsList');
 
-                    if (response.ok) {
-                        const data=await response.json();
-                        document.getElementById('totalPosts').textContent=data.totalPosts;
-                        document.getElementById('totalAlerts').textContent=data.totalAlerts;
+                    if (alerts.length === 0) {
+                        list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No recent alerts.</p>';
+                        return;
                     }
-                }
 
-                catch (error) {
-                    console.error('Error loading stats:', error);
+                    list.innerHTML = alerts.map(alert => `
+                        <div class="list-item">
+                            <div class="item-header">
+                                <span class="badge badge-danger">${alert.severity}</span>
+                                <span>${new Date(alert.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <div class="item-content">
+                                <strong>User ID: ${alert.user ? alert.user.id : 'Unknown'}</strong><br>
+                                ${alert.reason}
+                            </div>
+                        </div>
+                    `).join('');
                 }
+            } catch (error) {
+                console.error('Error loading alerts:', error);
             }
+        }
 
-            async function loadAlerts() {
-                try {
-                    const response=await fetch('/api/admin/alerts/recent');
+        async function loadFlaggedPosts() {
+            try {
+                const response = await fetch('/api/admin/posts/flagged');
+                if (response.ok) {
+                    const posts = await response.json();
+                    const list = document.getElementById('flaggedList');
+                    document.getElementById('flaggedCount').textContent = posts.length;
 
-                    if (response.ok) {
-                        const alerts=await response.json();
-                        const list=document.getElementById('alertsList');
-
-                        if (alerts.length===0) {
-                            list.innerHTML='<p style="color: var(--text-muted); text-align: center;">No recent alerts.</p>';
-                            return;
-                        }
-
-                        list.innerHTML=alerts.map(alert=> ` <div class="list-item" > <div class="item-header" > <span class="badge badge-danger" >$ {
-                                alert.severity
-                            }
-
-                            </span> <span>$ {
-                                new Date(alert.timestamp).toLocaleDateString()
-                            }
-
-                            </span> </div> <div class="item-content" > <strong>User ID: $ {
-                                alert.user ? alert.user.id : 'Unknown'
-                            }
-
-                            </strong><br> $ {
-                                alert.message
-                            }
-
-                            </div> </div> `).join('');
+                    if (posts.length === 0) {
+                        list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No flagged posts.</p>';
+                        return;
                     }
-                }
 
-                catch (error) {
-                    console.error('Error loading alerts:', error);
+                    list.innerHTML = posts.map(post => `
+                        <div class="list-item" id="post-${post.id}">
+                            <div class="item-header">
+                                <span class="badge badge-warning">Flagged</span>
+                                <span>${post.date}</span>
+                            </div>
+                            <div class="item-content">
+                                ${post.content}
+                                <div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--danger);">
+                                    Reason: ${post.flagReason || 'No reason provided'}
+                                </div>
+                            </div>
+                            <div class="actions">
+                                <button class="btn-success" onclick="unflagPost(${post.id})">Keep (Unflag)</button>
+                                <button class="btn-danger" onclick="deletePost(${post.id})">Delete</button>
+                            </div>
+                        </div>
+                    `).join('');
                 }
+            } catch (error) {
+                console.error('Error loading flagged posts:', error);
             }
+        }
 
-            async function loadFlaggedPosts() {
-                try {
-                    const response=await fetch('/api/admin/posts/flagged');
-
-                    if (response.ok) {
-                        const posts=await response.json();
-                        const list=document.getElementById('flaggedList');
-                        document.getElementById('flaggedCount').textContent=posts.length;
-
-                        if (posts.length===0) {
-                            list.innerHTML='<p style="color: var(--text-muted); text-align: center;">No flagged posts.</p>';
-                            return;
-                        }
-
-                        list.innerHTML=posts.map(post=> ` <div class="list-item" id="post-${post.id}" > <div class="item-header" > <span class="badge badge-warning" >Flagged</span> <span>$ {
-                                post.date
-                            }
-
-                            </span> </div> <div class="item-content" > $ {
-                                post.content
-                            }
-
-                            <div style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--danger);" > Reason: $ {
-                                post.flagReason || 'No reason provided'
-                            }
-
-                            </div> </div> <div class="actions" > <button class="btn-success" onclick="unflagPost(${post.id})" >Keep (Unflag)</button> <button class="btn-danger" onclick="deletePost(${post.id})" >Delete</button> </div> </div> `).join('');
-                    }
-                }
-
-                catch (error) {
-                    console.error('Error loading flagged posts:', error);
-                }
-            }
-
-            async function unflagPost(id) {
-                if ( !confirm('Are you sure you want to unflag this post?')) return;
-
-                try {
-                    const response=await fetch(`/api/admin/posts/$ {
-                            id
-                        }
-
-                        /unflag`, {
-                        method: 'PATCH'
-                    });
-
+        async function unflagPost(id) {
+            if (!confirm('Are you sure you want to unflag this post?')) return;
+            try {
+                const response = await fetch(`/api/admin/posts/${id}/resolve`, {
+                    method: 'POST'
+                });
                 if (response.ok) {
                     loadFlaggedPosts();
                 }
-            }
-
-            catch (error) {
+            } catch (error) {
                 console.error('Error unflagging post:', error);
             }
         }
 
         async function deletePost(id) {
-            if ( !confirm('Are you sure you want to delete this post permanently?')) return;
-
+            if (!confirm('Are you sure you want to delete this post permanently?')) return;
             try {
-                const response=await fetch(`/api/admin/posts/$ {
-                        id
-                    }
-
-                    `, {
+                const response = await fetch(`/api/admin/posts/${id}`, {
                     method: 'DELETE'
                 });
-
-            if (response.ok) {
-                loadFlaggedPosts();
-                loadStats(); // Update total posts count
+                if (response.ok) {
+                    loadFlaggedPosts();
+                    loadStats();
+                }
+            } catch (error) {
+                console.error('Error deleting post:', error);
             }
-        }
-
-        catch (error) {
-            console.error('Error deleting post:', error);
-        }
         }
 
         loadStats();
         loadAlerts();
         loadFlaggedPosts();
-        </script></body></html>
+    </script>
+</body>
+
+</html>

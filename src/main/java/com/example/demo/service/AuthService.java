@@ -54,7 +54,7 @@ public class AuthService {
 
     // Login and return JWT token
     public String login(String username, String password) throws Exception {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
+        Optional<User> optionalUser = userRepository.findByUsernameOrEmail(username, username);
         if (optionalUser.isEmpty()) {
             throw new Exception("User not found");
         }

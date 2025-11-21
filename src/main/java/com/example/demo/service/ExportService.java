@@ -22,7 +22,7 @@ public class ExportService {
 
     @Autowired
     public ExportService(MoodService moodService, JournalService journalService,
-                         StressService stressService, GoalService goalService) {
+            StressService stressService, GoalService goalService) {
         this.moodService = moodService;
         this.journalService = journalService;
         this.stressService = stressService;
@@ -74,7 +74,8 @@ public class ExportService {
         Double avgIntensity = moodService.getAverageMoodIntensity(user, start, end);
 
         document.add(new Paragraph("Total Mood Entries: " + moods.size()));
-        document.add(new Paragraph("Average Mood Intensity: " + (avgIntensity != null ? String.format("%.2f", avgIntensity) : "N/A")));
+        document.add(new Paragraph(
+                "Average Mood Intensity: " + (avgIntensity != null ? String.format("%.2f", avgIntensity) : "N/A")));
         document.add(new Paragraph(" "));
 
         if (!moods.isEmpty()) {
@@ -95,7 +96,8 @@ public class ExportService {
         document.add(new Paragraph(" "));
     }
 
-    private void addStressSection(Document document, User user, LocalDate start, LocalDate end) throws DocumentException {
+    private void addStressSection(Document document, User user, LocalDate start, LocalDate end)
+            throws DocumentException {
         Font sectionFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, BaseColor.RED);
         document.add(new Paragraph("Stress Summary", sectionFont));
         document.add(new Paragraph(" "));
@@ -104,11 +106,13 @@ public class ExportService {
         Double avgStress = stressService.getAverageStressLevel(user, start, end);
 
         document.add(new Paragraph("Total Stress Entries: " + stressList.size()));
-        document.add(new Paragraph("Average Stress Level: " + (avgStress != null ? String.format("%.2f", avgStress) : "N/A")));
+        document.add(new Paragraph(
+                "Average Stress Level: " + (avgStress != null ? String.format("%.2f", avgStress) : "N/A")));
         document.add(new Paragraph(" "));
     }
 
-    private void addJournalSection(Document document, User user, LocalDate start, LocalDate end) throws DocumentException {
+    private void addJournalSection(Document document, User user, LocalDate start, LocalDate end)
+            throws DocumentException {
         Font sectionFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, BaseColor.GREEN);
         document.add(new Paragraph("Journal Entries", sectionFont));
         document.add(new Paragraph(" "));
@@ -157,7 +161,9 @@ public class ExportService {
         for (Journal journal : journals) {
             String text = journal.getEntryText().replace(",", ";").replace("\n", " ");
             csv.append("Journal,").append(journal.getDate()).append(",")
-                    .append(journal.getEmotionTag()).append(",")
+                    .append(journal.getEmotionTags().stream().map(com.example.demo.model.EmotionTag::getName)
+                            .collect(java.util.stream.Collectors.joining(";")))
+                    .append(",")
                     .append(text).append("\n");
         }
 

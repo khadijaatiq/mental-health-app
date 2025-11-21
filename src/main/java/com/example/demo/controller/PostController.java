@@ -4,10 +4,12 @@ import com.example.demo.dto.PostDTO;
 import com.example.demo.model.Post;
 import com.example.demo.model.User;
 import com.example.demo.service.PostService;
+import com.example.demo.service.UserActivityService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -15,9 +17,11 @@ import java.util.stream.Collectors;
 public class PostController {
 
     private final PostService postService;
+    private final UserActivityService userActivityService;
 
-    public PostController(PostService postService) {
+    public PostController(PostService postService, UserActivityService userActivityService) {
         this.postService = postService;
+        this.userActivityService = userActivityService;
     }
 
     @PostMapping
@@ -28,6 +32,7 @@ public class PostController {
         post.setAnonymous(postDTO.isAnonymous());
 
         Post saved = postService.createPost(post);
+        userActivityService.logActivity(user, "POST_CREATED", "Created post ID: " + saved.getId());
         return ResponseEntity.ok(saved);
     }
 
@@ -45,8 +50,7 @@ public class PostController {
                         p.getDate(),
                         p.isFlagged(),
                         p.getFlagReason(),
-                        p.isAnonymous() ? "Anonymous" : p.getUser().getUsername()
-                ))
+                        p.isAnonymous() ? "Anonymous" : p.getUser().getUsername()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(postDTOs);
@@ -69,15 +73,15 @@ public class PostController {
                     post.getDate(),
                     post.isFlagged(),
                     post.getFlagReason(),
-                    post.isAnonymous() ? "Anonymous" : post.getUser().getUsername()
-            );
+                    post.isAnonymous() ? "Anonymous" : post.getUser().getUsername());
             return ResponseEntity.ok(postDTO);
         }
         return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Post> update(@PathVariable Long id, @RequestBody PostDTO postDTO, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Post> update(@PathVariable Long id, @RequestBody PostDTO postDTO,
+            @AuthenticationPrincipal User user) {
         Post post = postService.getPost(id);
         if (post != null && post.getUser().getId().equals(user.getId())) {
             post.setContent(postDTO.getContent());
@@ -94,6 +98,20 @@ public class PostController {
         if (post != null && post.getUser().getId().equals(user.getId())) {
             postService.deletePost(id);
             return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/{id}/flag")
+    public ResponseEntity<Void> flagPost(@PathVariable Long id, @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal User user) {
+        Post post = postService.getPost(id);
+        if (post != null) {
+            post.setFlagged(true);
+            post.setFlagReason(body.getOrDefault("reason", "Flagged by user"));
+            postService.updatePost(post);
+            userActivityService.logActivity(user, "POST_FLAGGED", "Flagged post ID: " + id);
+            return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
     }
