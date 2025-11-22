@@ -6,16 +6,15 @@ import com.example.demo.model.Journal;
 import com.example.demo.model.User;
 import com.example.demo.service.EmotionTagService;
 import com.example.demo.service.JournalService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/journals")
@@ -74,6 +73,18 @@ public class JournalController {
         return ResponseEntity.ok(journals);
     }
 
+    @GetMapping("/date")
+    public ResponseEntity<List<Journal>> getJournalByDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                                    @AuthenticationPrincipal User user) {
+
+        System.out.println("Received getJournalByDate request for date: " + date + ", user: " + user.getUsername());
+        List<Journal> journals = journalService.getJournalsByUserAndDate(user, date);
+        if (journals.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(journals);
+    }
+
     @GetMapping("/emotion-distribution")
     public ResponseEntity<Map<String, Long>> getEmotionDistribution(@AuthenticationPrincipal User user) {
         Map<String, Long> distribution = journalService.getEmotionDistribution(user);
@@ -81,6 +92,7 @@ public class JournalController {
     }
 
     @GetMapping("/{id}")
+    @Transactional // Add this annotation
     public ResponseEntity<Journal> get(@PathVariable Long id, @AuthenticationPrincipal User user) {
         Journal journal = journalService.getJournalById(id);
         if (journal != null && journal.getUser().getId().equals(user.getId())) {
