@@ -17,9 +17,12 @@ public interface JournalRepository extends JpaRepository<Journal, Long> {
     List<Journal> findByUserOrderByDateDesc(User user);
 
     Optional<Journal> findByUserAndDate(User user, LocalDate date);
-
+    @Query("SELECT j FROM Journal j LEFT JOIN FETCH j.emotionTags WHERE j.user.id = :userId AND j.date = :date")
+    List<Journal> findByUserIdAndDate(@Param("userId") Long userId, @Param("date") LocalDate date);
     List<Journal> findByUserAndDateBetween(User user, LocalDate start, LocalDate end);
 
+    @Query("SELECT j FROM Journal j LEFT JOIN FETCH j.emotionTags WHERE j.id = :id")
+    Optional<Journal> findByIdWithEmotionTags(@Param("id") Long id);
     List<Journal> findByUserAndEmotionTags_Name(User user, String tagName);
 
     @Query("SELECT t.name, COUNT(j) FROM Journal j JOIN j.emotionTags t WHERE j.user = :user GROUP BY t.name")
