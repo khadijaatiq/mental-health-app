@@ -5,6 +5,8 @@ import com.example.demo.model.User;
 import com.example.demo.repository.JournalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +32,8 @@ public class JournalService {
     }
 
     public Journal getJournalById(Long id) {
-        return journalRepository.findById(id).orElse(null);
+        return journalRepository.findByIdWithEmotionTags(id)
+                .orElseThrow(() -> new RuntimeException("Journal not found"));
     }
 
     // User-specific methods
@@ -38,9 +41,16 @@ public class JournalService {
         return journalRepository.findByUserOrderByDateDesc(user);
     }
 
-    public Optional<Journal> getJournalByUserAndDate(User user, LocalDate date) {
-        return journalRepository.findByUserAndDate(user, date);
+    public List<Journal> getJournalsByUserAndDate(User user, LocalDate date) {
+        List<Journal> journals = journalRepository.findByUserIdAndDate(user.getId(), date);
+        if (journals.isEmpty()) {
+            System.out.println("No journal found for user " + user.getUsername() + " and date " + date);
+        } else {
+            System.out.println("Found " + journals.size() + " journal(s) for user " + user.getUsername() + " and date " + date);
+        }
+        return journals;
     }
+
 
     public List<Journal> getJournalsByUserAndDateRange(User user, LocalDate start, LocalDate end) {
         return journalRepository.findByUserAndDateBetween(user, start, end);
