@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>User Management - MindTrack Admin</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/css/admin-dashboard.css">
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        .container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h2 {
+            color: var(--primary);
+        }
+
+        .card {
+            background-color: var(--surface);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            text-align: left;
+        }
+
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.3rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background-color: rgba(16,185,129,0.2);
+            color: var(--success);
+        }
+
+        .badge-danger {
+            background-color: rgba(239,68,68,0.2);
+            color: var(--danger);
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        button {
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-warning { background-color: var(--warning); }
+        .btn-danger { background-color: var(--danger); }
+        .btn-export { background-color: var(--primary); }
+    </style>
+</head>
+
+<body>
+
+<!-- Navbar fragment -->
+<div th:insert="admin/navbar :: navbar"></div>
+
+<div class="container">
+
+    <div class="header">
+        <h2>User Management</h2>
+        <button class="btn-export" onclick="exportUsers()">Export CSV</button>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Roles</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+
+            <tbody id="usersTable"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    function getJwt() {
+        return document.cookie.split("; ").find(r => r.startsWith("JWT="))?.split("=")[1];
+    }
+
+    async function loadUsers() {
+        try {
+            const res = await fetch("/api/admin/users", {
+                headers: { "Authorization": "Bearer " + getJwt() }
+            });
+
+            if (!res.ok) {
+                console.error("Auth failed");
+                return;
+            }
+
+            const users = await res.json();
+            const tbody = document.getElementById("usersTable");
+
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td>${u.id}</td>
+                    <td>${u.username}</td>
+                    <td>${u.email}</td>
+
+                    <td>${Array.isArray(u.roles) ? u.roles.join(", ") : "USER"}</td>
+
+                    <td>
+                        <span class="badge ${u.blocked ? 'badge-danger' : 'badge-success'}">
+                            ${u.blocked ? "Blocked" : "Active"}
+                        </span>
+                    </td>
+
+                    <td class="actions">
+                        <button class="btn-warning"
+                            onclick="toggleBlock(${u.id}, ${!u.blocked})">
+                            ${u.blocked ? "Unblock" : "Block"}
+                        </button>
+
+                        <button class="btn-danger" onclick="deleteUser(${u.id})">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+
+        } catch (err) {
+            console.error("Error loading users:", err);
+        }
+    }
+
+    async function toggleBlock(id, blocked) {
+        if (!confirm(`Are you sure you want to ${blocked ? "block" : "unblock"} this user?`)) return;
+
+        await fetch(`/api/admin/users/${id}/block`, {
+            method: "PATCH",
+            headers: {
+                "Authorization": "Bearer " + getJwt(),
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ blocked })
+        });
+
+        loadUsers();
+    }
+
+    async function deleteUser(id) {
+        if (!confirm("Delete this user permanently?")) return;
+
+        await fetch(`/api/admin/users/${id}`, {
+            method: "DELETE",
+            headers: { "Authorization": "Bearer " + getJwt() }
+        });
+
+        loadUsers();
+    }
+
+    function exportUsers() {
+        window.location.href = "/api/admin/export/users";
+    }
+
+    loadUsers();
+</script>
+
+</body>
+</html>

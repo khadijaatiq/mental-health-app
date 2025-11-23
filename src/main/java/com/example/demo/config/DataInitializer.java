@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,10 +22,8 @@ public class DataInitializer {
                 admin.setUsername("admin");
                 admin.setEmail("admin@mindtrack.com");
                 admin.setPassword(passwordEncoder.encode("admin123"));
-
                 Set<String> roles = new HashSet<>();
-                roles.add("ADMIN");
-                roles.add("USER");
+                roles.add("ROLE_ADMIN");
                 admin.setRoles(roles);
 
                 userRepository.save(admin);

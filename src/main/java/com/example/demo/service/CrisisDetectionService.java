@@ -33,7 +33,8 @@ public class CrisisDetectionService {
         LocalDate weekAgo = now.minusWeeks(1);
 
         // Check mood patterns
-        List<Mood> recentMoods = moodService.getMoodsByUserAndDateRange(user, weekAgo, now);
+        List<Mood> recentMoods = moodService.getMoodsByUserAndDateRange(user, weekAgo.atStartOfDay(),
+                now.atTime(23, 59, 59));
         double avgMoodIntensity = recentMoods.stream()
                 .mapToInt(Mood::getIntensity)
                 .average()

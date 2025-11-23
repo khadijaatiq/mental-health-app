@@ -2,43 +2,132 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Resource;
 import com.example.demo.service.ResourceService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
-@RequestMapping("/resources")
+@RequestMapping("/api/resources")
 public class ResourceController {
 
     private final ResourceService resourceService;
+
+    @Value("${file.upload-dir:uploads/}")
+    private String uploadDir;
 
     public ResourceController(ResourceService resourceService) {
         this.resourceService = resourceService;
     }
 
+    // CREATE (Admin only)
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public Resource create(@RequestBody Resource resource) {
         return resourceService.createResource(resource);
     }
 
+    // READ ALL (Public)
     @GetMapping
     public List<Resource> all() {
         return resourceService.getAllResources();
     }
 
+    // READ ONE (Public)
     @GetMapping("/{id}")
     public Resource get(@PathVariable Long id) {
         return resourceService.getResource(id);
     }
 
+    // UPDATE (Admin only)
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public Resource update(@PathVariable Long id, @RequestBody Resource resource) {
-        resource.setId(id);
-        return resourceService.updateResource(resource);
+        return resourceService.updateResource(id, resource);
     }
 
+    // DELETE (Admin only)
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         resourceService.deleteResource(id);
+    }
+
+    // SEARCH (Public)
+    @GetMapping("/search")
+    public List<Resource> search(@RequestParam String keyword) {
+        return resourceService.searchResources(keyword);
+    }
+
+    // FILTER BY CATEGORY (Public)
+    @GetMapping("/category/{category}")
+    public List<Resource> filter(@PathVariable String category) {
+        return resourceService.filterByCategory(category);
+    }
+
+    // FILE UPLOAD (Admin only)
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/upload")
+    public String uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
+        // Create upload directory if it doesn't exist
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        // Save file
+        String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        Path filePath = uploadPath.resolve(filename);
+        Files.copy(file.getInputStream(), filePath);
+
+        // Return the file path
+        return uploadDir + filename;
+    }
+
+    // LOAD DEFAULT RESOURCES (Admin only - convenience endpoint for demo)
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/load-defaults")
+    public List<Resource> loadDefaults() {
+        List<Resource> defaultResources = List.of(
+                new Resource(
+                        "Meditation Guide",
+                        "Comprehensive guide to meditation techniques for beginners and advanced practitioners. Learn mindfulness meditation, breathing exercises, and body scan techniques.",
+                        "Meditation",
+                        "https://www.mindful.org/meditation/mindfulness-getting-started/",
+                        null),
+                new Resource(
+                        "Stress Management Toolkit",
+                        "Evidence-based strategies for managing stress in daily life. Includes practical exercises, coping mechanisms, and relaxation techniques.",
+                        "Stress Management",
+                        "https://www.apa.org/topics/stress/tips",
+                        null),
+                new Resource(
+                        "Understanding Depression",
+                        "Educational resource about depression, its symptoms, causes, and treatment options. Includes information about therapy and medication.",
+                        "Depression Support",
+                        "https://www.nimh.nih.gov/health/topics/depression",
+                        null),
+                new Resource(
+                        "Mindfulness Exercises",
+                        "Daily mindfulness practices for mental wellness. Simple exercises you can do anywhere to reduce anxiety and improve focus.",
+                        "Mindfulness",
+                        "https://www.headspace.com/mindfulness",
+                        null),
+                new Resource(
+                        "Anxiety Coping Strategies",
+                        "Practical techniques for managing anxiety and panic attacks. Learn grounding exercises, cognitive strategies, and breathing techniques.",
+                        "Anxiety Relief",
+                        "https://www.anxietycanada.com/resources/",
+                        null));
+
+        return defaultResources.stream()
+                .map(resourceService::createResource)
+                .toList();
     }
 }

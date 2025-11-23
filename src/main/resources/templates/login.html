@@ -136,7 +136,6 @@
             Don't have an account? <a href="/register">Sign up</a>
         </div>
     </div>
-
     <script>
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -153,19 +152,30 @@
                     body: JSON.stringify({ username, password })
                 });
 
+                const data = await response.json();
+
                 if (response.ok) {
-                    window.location.href = '/dashboard';
+                    // save token
+                    document.cookie = `JWT=${data.token}; path=/; SameSite=Lax;`;
+
+                    // redirect based on role
+                    if (data.admin === true) {
+                        window.location.href = '/admin/dashboard';
+                    } else {
+                        window.location.href = '/dashboard';
+                    }
+
                 } else {
-                    const data = await response.json();
                     errorDiv.textContent = data.error || 'Login failed';
                     errorDiv.style.display = 'block';
                 }
+
             } catch (error) {
                 errorDiv.textContent = 'An error occurred';
                 errorDiv.style.display = 'block';
             }
         });
     </script>
-</body>
+
 
 </html>

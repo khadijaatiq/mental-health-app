@@ -1,11 +1,16 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.User;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.service.AuthService;
 import com.example.demo.service.UserActivityService;
-import com.example.demo.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
@@ -18,7 +23,7 @@ public class AuthController {
     private final UserRepository userRepository;
 
     public AuthController(AuthService authService, UserActivityService userActivityService,
-            UserRepository userRepository) {
+                          UserRepository userRepository) {
         this.authService = authService;
         this.userActivityService = userActivityService;
         this.userRepository = userRepository;
@@ -44,41 +49,33 @@ public class AuthController {
     }
 
     // Login endpoint
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body,
-            jakarta.servlet.http.HttpServletResponse response) {
+    @PostMapping("/login")  // FIXED
+    public ResponseEntity<?> login(@RequestBody Map<String, String> request, HttpServletResponse response) {
         try {
-            String username = body.get("username");
-            String password = body.get("password");
-
-            if (username == null || password == null) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Username and password are required"));
-            }
+            String username = request.get("username");
+            String password = request.get("password");
 
             String token = authService.login(username, password);
 
-            java.util.Optional<User> userOpt = userRepository.findByUsernameOrEmail(username, username);
-            userOpt.ifPresent(user -> {
-                userActivityService.logActivity(user, "LOGIN", "User logged in successfully");
-            });
+            User user = userRepository.findByUsernameOrEmail(username, username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-            jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("JWT", token);
+            boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
+
+            // Set JWT cookie (IMPORTANT)
+            Cookie cookie = new Cookie("JWT", token);
             cookie.setHttpOnly(true);
-            cookie.setSecure(false); // Set to true in production
             cookie.setPath("/");
-            cookie.setMaxAge(24 * 60 * 60); // 1 day
+            cookie.setMaxAge(24 * 60 * 60);
             response.addCookie(cookie);
 
-            Map<String, Object> responseBody = new java.util.HashMap<>();
-            responseBody.put("token", token);
-            if (userOpt.isPresent()) {
-                responseBody.put("roles", userOpt.get().getRoles());
-            }
-
-            return ResponseEntity.ok(responseBody);
+            return ResponseEntity.ok(Map.of(
+                    "token", token,
+                    "admin", isAdmin
+            ));
 
         } catch (Exception e) {
-            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
         }
     }
 }

@@ -6,16 +6,16 @@ public class HabitDTO {
     private Long id;
     private String habitName;
     private String frequency;
-    private LocalDate dateCompleted;
+    private LocalDate lastCompletedDate;
     private int currentStreak;
 
     public HabitDTO() {}
 
-    public HabitDTO(Long id, String habitName, String frequency, LocalDate dateCompleted, int currentStreak) {
+    public HabitDTO(Long id, String habitName, String frequency, LocalDate lastCompletedDate, int currentStreak) {
         this.id = id;
         this.habitName = habitName;
         this.frequency = frequency;
-        this.dateCompleted = dateCompleted;
+        this.lastCompletedDate = lastCompletedDate;
         this.currentStreak = currentStreak;
     }
 
@@ -25,8 +25,8 @@ public class HabitDTO {
     public void setHabitName(String habitName) { this.habitName = habitName; }
     public String getFrequency() { return frequency; }
     public void setFrequency(String frequency) { this.frequency = frequency; }
-    public LocalDate getDateCompleted() { return dateCompleted; }
-    public void setDateCompleted(LocalDate dateCompleted) { this.dateCompleted = dateCompleted; }
+    public LocalDate getLastCompletedDate() { return lastCompletedDate; }
+    public void setLastCompletedDate(LocalDate lastCompletedDate) { this.lastCompletedDate = lastCompletedDate; }
     public int getCurrentStreak() { return currentStreak; }
     public void setCurrentStreak(int currentStreak) { this.currentStreak = currentStreak; }
 }

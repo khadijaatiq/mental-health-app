@@ -15,8 +15,8 @@ public class CheckInService {
     private final CheckInRepository checkInRepository;
     private final Random random = new Random();
 
-    // Predefined reflection questions
-    private final List<String> questions = Arrays.asList(
+    // Predefined reflection questions - Mutable for Admin configuration
+    private final List<String> questions = new java.util.ArrayList<>(Arrays.asList(
             "How are you feeling today?",
             "What's one thing you're grateful for?",
             "What challenged you today?",
@@ -26,8 +26,7 @@ public class CheckInService {
             "How well did you take care of yourself today?",
             "What's on your mind right now?",
             "What do you need more of in your life?",
-            "What's one thing you're looking forward to?"
-    );
+            "What's one thing you're looking forward to?"));
 
     @Autowired
     public CheckInService(CheckInRepository checkInRepository) {
@@ -59,5 +58,17 @@ public class CheckInService {
 
     public void deleteCheckIn(Long id) {
         checkInRepository.deleteById(id);
+    }
+
+    public void addQuestion(String question) {
+        questions.add(question);
+    }
+
+    public void removeQuestion(String question) {
+        questions.remove(question);
+    }
+
+    public List<String> getAllQuestions() {
+        return questions;
     }
 }

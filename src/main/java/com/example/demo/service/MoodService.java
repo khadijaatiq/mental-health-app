@@ -5,7 +5,7 @@ import com.example.demo.model.User;
 import com.example.demo.repository.MoodRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,11 +38,11 @@ public class MoodService {
         return moodRepository.findByUserOrderByDateDesc(user);
     }
 
-    public List<Mood> getMoodsByUserAndDateRange(User user, LocalDate start, LocalDate end) {
+    public List<Mood> getMoodsByUserAndDateRange(User user, LocalDateTime start, LocalDateTime end) {
         return moodRepository.findByUserAndDateBetween(user, start, end);
     }
 
-    public Double getAverageMoodIntensity(User user, LocalDate start, LocalDate end) {
+    public Double getAverageMoodIntensity(User user, LocalDateTime start, LocalDateTime end) {
         return moodRepository.getAverageIntensity(user, start, end);
     }
 

@@ -28,7 +28,8 @@ public class AnalyticsService {
         AnalyticsDTO analytics = new AnalyticsDTO();
 
         // Mood analytics
-        Double avgMoodIntensity = moodService.getAverageMoodIntensity(user, startDate, endDate);
+        Double avgMoodIntensity = moodService.getAverageMoodIntensity(user, startDate.atStartOfDay(),
+                endDate.atTime(23, 59, 59));
         analytics.setAverageMoodIntensity(avgMoodIntensity);
 
         Map<String, Long> moodCounts = moodService.getMoodDistribution(user);
@@ -62,8 +63,9 @@ public class AnalyticsService {
         LocalDate weekAgo = now.minusWeeks(1);
         LocalDate twoWeeksAgo = now.minusWeeks(2);
 
-        Double thisWeekMood = moodService.getAverageMoodIntensity(user, weekAgo, now);
-        Double lastWeekMood = moodService.getAverageMoodIntensity(user, twoWeeksAgo, weekAgo);
+        Double thisWeekMood = moodService.getAverageMoodIntensity(user, weekAgo.atStartOfDay(), now.atTime(23, 59, 59));
+        Double lastWeekMood = moodService.getAverageMoodIntensity(user, twoWeeksAgo.atStartOfDay(),
+                weekAgo.atTime(23, 59, 59));
 
         Double thisWeekStress = stressService.getAverageStressLevel(user, weekAgo, now);
         Double lastWeekStress = stressService.getAverageStressLevel(user, twoWeeksAgo, weekAgo);

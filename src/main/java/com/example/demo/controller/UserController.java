@@ -34,7 +34,7 @@ public class UserController {
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         try {
             if (user.getRoles() == null || user.getRoles().isEmpty()) {
-                user.setRoles(Set.of("USER")); // default role
+                user.setRoles(Set.of("ROLE_USER")); // default role
             }
             User savedUser = userService.register(user);
             return ResponseEntity.ok(savedUser);

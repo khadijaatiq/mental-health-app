@@ -31,9 +31,8 @@ public class JournalService {
         return journalRepository.findAll();
     }
 
-    public Journal getJournalById(Long id) {
-        return journalRepository.findByIdWithEmotionTags(id)
-                .orElseThrow(() -> new RuntimeException("Journal not found"));
+    public Journal getJournalById(long id) {
+        return journalRepository.findById(id).orElse(null);
     }
 
     // User-specific methods
@@ -72,7 +71,7 @@ public class JournalService {
         return journalRepository.save(journal);
     }
 
-    public void deleteJournal(Long id) {
+    public void deleteJournal(long id) {
         journalRepository.deleteById(id);
     }
 }

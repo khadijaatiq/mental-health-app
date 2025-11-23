@@ -34,6 +34,50 @@ public class Journal {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getEntryText() {
+        return entryText;
+    }
+
+    public void setEntryText(String entryText) {
+        this.entryText = entryText;
+    }
+
+    public java.util.Set<EmotionTag> getEmotionTags() {
+        return emotionTags;
+    }
+
+    public void setEmotionTags(java.util.Set<EmotionTag> emotionTags) {
+        this.emotionTags = emotionTags;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
     @PrePersist
     public void onCreate() {
         if (this.date == null)

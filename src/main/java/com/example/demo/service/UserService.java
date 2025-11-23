@@ -33,7 +33,7 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    public Optional<User> findById(Long id) {
+    public Optional<User> findById(long id) {
         return userRepository.findById(id);
     }
 
@@ -41,7 +41,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public void deleteUser(Long id) {
+    public void deleteUser(long id) {
         userRepository.deleteById(id);
     }
 }

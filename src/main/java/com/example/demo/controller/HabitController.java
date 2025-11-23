@@ -106,4 +106,18 @@ public class HabitController {
         }
         return ResponseEntity.notFound().build();
     }
+    @PatchMapping("/{id}/checkin")
+    public ResponseEntity<Habit> checkInHabit(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user) {
+
+        Habit habit = habitService.getHabitById(id);
+        if (habit != null && habit.getUser().getId().equals(user.getId())) {
+            Habit completed = habitService.checkInHabit(id);
+            return ResponseEntity.ok(completed);
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
 }

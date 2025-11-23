@@ -2,13 +2,13 @@ package com.example.demo.service;
 
 import com.example.demo.model.*;
 import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -70,8 +70,11 @@ public class ExportService {
         document.add(new Paragraph("Mood Summary", sectionFont));
         document.add(new Paragraph(" "));
 
-        List<Mood> moods = moodService.getMoodsByUserAndDateRange(user, start, end);
-        Double avgIntensity = moodService.getAverageMoodIntensity(user, start, end);
+        LocalDateTime startDateTime = start.atStartOfDay();
+        LocalDateTime endDateTime = end.atTime(23, 59, 59);
+
+        List<Mood> moods = moodService.getMoodsByUserAndDateRange(user, startDateTime, endDateTime);
+        Double avgIntensity = moodService.getAverageMoodIntensity(user, startDateTime, endDateTime);
 
         document.add(new Paragraph("Total Mood Entries: " + moods.size()));
         document.add(new Paragraph(
@@ -85,7 +88,7 @@ public class ExportService {
             table.addCell("Mood Level");
             table.addCell("Intensity");
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             for (Mood mood : moods) {
                 table.addCell(mood.getDate().format(formatter));
                 table.addCell(mood.getMoodLevel());
@@ -141,7 +144,10 @@ public class ExportService {
         csv.append("Type,Date,Value,Details\n");
 
         // Export moods
-        List<Mood> moods = moodService.getMoodsByUserAndDateRange(user, startDate, endDate);
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+        List<Mood> moods = moodService.getMoodsByUserAndDateRange(user, startDateTime, endDateTime);
+
         for (Mood mood : moods) {
             csv.append("Mood,").append(mood.getDate()).append(",")
                     .append(mood.getMoodLevel()).append(",")
@@ -168,5 +174,9 @@ public class ExportService {
         }
 
         return csv.toString();
+    }
+
+    public String exportSystemDataToCSV(LocalDate startDate, LocalDate endDate) {
+        return "System export not implemented in service layer. Use AdminController.";
     }
 }

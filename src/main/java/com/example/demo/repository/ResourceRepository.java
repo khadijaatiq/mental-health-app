@@ -7,7 +7,10 @@ import java.util.List;
 
 @Repository
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
-    List<Resource> findByTag(String tag);
-    List<Resource> findByAddedByAdmin(boolean addedByAdmin);
+
+    List<Resource> findByCategory(String category);
+
     List<Resource> findByTitleContainingIgnoreCase(String keyword);
+
+    List<Resource> findByCategoryAndTitleContainingIgnoreCase(String category, String keyword);
 }

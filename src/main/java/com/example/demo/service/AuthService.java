@@ -39,11 +39,11 @@ public class AuthService {
 
         // Assign roles
         Set<String> roles = new HashSet<>();
-        roles.add("USER"); // Default role
+        roles.add("ROLE_USER"); // Default role
 
         // Check for admin code
         if ("admin-secret".equals(adminCode)) {
-            roles.add("ADMIN");
+            roles.add("ROLE_ADMIN");
         }
 
         user.setRoles(roles);

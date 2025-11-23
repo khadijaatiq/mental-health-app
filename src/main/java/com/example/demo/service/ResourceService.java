@@ -25,26 +25,31 @@ public class ResourceService {
     }
 
     public Resource getResource(Long id) {
-        return resourceRepository.findById(id).orElse(null);
+        return resourceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Resource not found with id: " + id));
     }
 
-    public List<Resource> getResourcesByTag(String tag) {
-        return resourceRepository.findByTag(tag);
+    public Resource updateResource(Long id, Resource updated) {
+        Resource existing = getResource(id);
+
+        existing.setTitle(updated.getTitle());
+        existing.setDescription(updated.getDescription());
+        existing.setCategory(updated.getCategory());
+        existing.setLink(updated.getLink());
+        existing.setFileUrl(updated.getFileUrl());
+
+        return resourceRepository.save(existing);
+    }
+
+    public void deleteResource(Long id) {
+        resourceRepository.deleteById(id);
     }
 
     public List<Resource> searchResources(String keyword) {
         return resourceRepository.findByTitleContainingIgnoreCase(keyword);
     }
 
-    public List<Resource> getAdminResources() {
-        return resourceRepository.findByAddedByAdmin(true);
-    }
-
-    public Resource updateResource(Resource resource) {
-        return resourceRepository.save(resource);
-    }
-
-    public void deleteResource(Long id) {
-        resourceRepository.deleteById(id);
+    public List<Resource> filterByCategory(String category) {
+        return resourceRepository.findByCategory(category);
     }
 }

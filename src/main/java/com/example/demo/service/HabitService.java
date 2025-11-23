@@ -22,7 +22,7 @@ public class HabitService {
         return habitRepository.save(habit);
     }
 
-    public Habit getHabitById(Long id) {
+    public Habit getHabitById(long id) {
         return habitRepository.findById(id).orElse(null);
     }
 
@@ -36,46 +36,50 @@ public class HabitService {
     }
 
     public List<Habit> getTodayCompletedHabits(User user) {
-        return habitRepository.findByUserAndDateCompleted(user, LocalDate.now());
+        return habitRepository.findByUserAndLastCompletedDate(user, LocalDate.now());
+    }
+    public Habit markHabitAsCompleted(long id, LocalDate date) {
+        Habit habit = habitRepository.findById(id).orElse(null);
+        if (habit == null) return null;
+
+        LocalDate last = habit.getLastCompletedDate();
+        LocalDate today = date;
+
+        if (last == null) {
+            habit.setStreak(1);
+        } else if (last.equals(today)) {
+            // already completed today → do nothing
+            return habit;
+        } else if (last.equals(today.minusDays(1))) {
+            habit.setStreak(habit.getStreak() + 1); // consecutive day
+        } else {
+            habit.setStreak(1); // reset streak
+        }
+
+        habit.setLastCompletedDate(today);
+        return habitRepository.save(habit);
     }
 
-    public Habit markHabitAsCompleted(Long id, LocalDate date) {
-        Habit habit = habitRepository.findById(id).orElse(null);
-        if (habit != null) {
-            habit.setDateCompleted(date);
-            return habitRepository.save(habit);
-        }
-        return null;
-    }
 
     public int calculateStreak(User user, String habitName) {
-        List<Habit> habits = habitRepository.findByUser(user);
-        // Simple streak calculation - count consecutive days
-        int streak = 0;
-        LocalDate checkDate = LocalDate.now();
+        Habit habit = habitRepository.findByUser(user)
+                .stream()
+                .filter(h -> h.getHabitName().equals(habitName))
+                .findFirst()
+                .orElse(null);
 
-        for (int i = 0; i < 30; i++) { // Check last 30 days
-            final LocalDate currentDate = checkDate;
-            boolean completedOnDate = habits.stream()
-                    .anyMatch(h -> h.getHabitName().equals(habitName) &&
-                            h.getDateCompleted() != null &&
-                            h.getDateCompleted().equals(currentDate));
+        return habit != null ? habit.getStreak() : 0;
+    }
 
-            if (completedOnDate) {
-                streak++;
-                checkDate = checkDate.minusDays(1);
-            } else {
-                break;
-            }
-        }
-        return streak;
+    public Habit checkInHabit(Long id) {
+        return markHabitAsCompleted(id, LocalDate.now());
     }
 
     public Habit updateHabit(Habit habit) {
         return habitRepository.save(habit);
     }
 
-    public void deleteHabit(Long id) {
+    public void deleteHabit(long id) {
         habitRepository.deleteById(id);
     }
 }

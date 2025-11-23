@@ -25,7 +25,7 @@ public class GoalService {
         return goalRepository.save(goal);
     }
 
-    public Goal getGoalById(Long id) {
+    public Goal getGoalById(long id) {
         return goalRepository.findById(id).orElse(null);
     }
 
@@ -46,7 +46,7 @@ public class GoalService {
         return goalRepository.findByUserAndTargetDateBefore(user, LocalDate.now());
     }
 
-    public Goal markGoalAsCompleted(Long id) {
+    public Goal markGoalAsCompleted(long id) {
         Goal goal = goalRepository.findById(id).orElse(null);
         if (goal != null) {
             goal.setStatus("completed");
@@ -59,7 +59,7 @@ public class GoalService {
         return goalRepository.save(goal);
     }
 
-    public void deleteGoal(Long id) {
+    public void deleteGoal(long id) {
         goalRepository.deleteById(id);
     }
 }

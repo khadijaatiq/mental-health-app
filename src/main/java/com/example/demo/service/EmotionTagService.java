@@ -34,7 +34,7 @@ public class EmotionTagService {
         return emotionTagRepository.findByName(name).orElse(null);
     }
 
-    public void deleteTag(Long id) {
+    public void deleteTag(long id) {
         emotionTagRepository.deleteById(id);
     }
 }

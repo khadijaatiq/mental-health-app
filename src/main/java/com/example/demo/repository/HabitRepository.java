@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface HabitRepository extends JpaRepository<Habit, Long> {
     List<Habit> findByUser(User user);
-    List<Habit> findByUserAndDateCompleted(User user, LocalDate date);
+    List<Habit> findByUserAndLastCompletedDate(User user, LocalDate date);
     List<Habit> findByUserOrderByCreatedAtDesc(User user);
 }

@@ -11,6 +11,10 @@ public class JournalDTO {
     private java.util.List<String> emotionTags;
     private LocalDate date;
 
+    public Long getId() {
+        return id;
+    }
+
     public java.util.List<String> getEmotionTags() {
         return emotionTags;
     }

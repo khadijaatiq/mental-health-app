@@ -36,6 +36,7 @@
             font-weight: 700;
             background: linear-gradient(to right, #818cf8, #c084fc);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -217,16 +218,29 @@
                                 <p>${goal.description || ''}</p>
                                 <div class="goal-meta">Target: ${goal.targetDate}</div>
                             </div>
-                            ${goal.status !== 'completed' ? `
-                            <div class="goal-actions">
-                                <button onclick="markCompleted(${goal.id})">Complete</button>
+                            <div class="goal-actions" style="display:flex; gap:0.5rem;">
+                                ${goal.status !== 'completed' ? `<button onclick="markCompleted(${goal.id})">Complete</button>` : ''}
+                                <button style="background-color: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="deleteGoal(${goal.id})">Delete</button>
                             </div>
-                            ` : ''}
                         </li>
                     `).join('');
                 }
             } catch (error) {
                 console.error('Error loading goals:', error);
+            }
+        }
+
+        async function deleteGoal(id) {
+            if (!confirm('Are you sure you want to delete this goal?')) return;
+            try {
+                const response = await fetch(`/api/goals/${id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    loadGoals();
+                }
+            } catch (error) {
+                console.error('Error deleting goal:', error);
             }
         }
 

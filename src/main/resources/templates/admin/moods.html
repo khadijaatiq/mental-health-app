@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Manage Moods</title>
+  <link rel="stylesheet" href="/css/admin-dashboard.css">
+</head>
+
+<body>
+
+<nav class="navbar">
+  <div class="logo">MindTrack Admin</div>
+  <div class="nav-links">
+    <a href="/admin/dashboard">Dashboard</a>
+    <a href="/admin/resources">Resources</a>
+    <a href="/admin/board">Board</a>
+    <a href="/admin/crisis">Crisis</a>
+    <a href="/admin/reports">Reports</a>
+    <a href="/admin/settings">Settings</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </div>
+</nav>
+
+<div class="container">
+  <h2>Manage Moods</h2>
+
+  <div style="margin: 1rem 0;">
+    <input id="newMood" placeholder="New mood" style="padding: .5rem;">
+    <button class="btn-primary" onclick="addMood()">Add</button>
+  </div>
+
+  <ul id="moodList" class="list"></ul>
+</div>
+
+<script>
+  function logout() {
+      document.cookie = "JWT=; expires=Thu, 01 Jan 1970; path=/;";
+      window.location.href = "/login";
+  }
+
+  function getJwt() {
+      return document.cookie.split("; ")
+          .find(r => r.startsWith("JWT="))
+          ?.split("=")[1];
+  }
+
+  async function loadMoods() {
+      const jwt = getJwt();
+
+      const res = await fetch("/api/admin/moods", {
+          headers: { "Authorization": "Bearer " + jwt }
+      });
+
+      const list = await res.json();
+      const ul = document.getElementById("moodList");
+      ul.innerHTML = "";
+
+      list.forEach(m => {
+          ul.innerHTML += `
+              <li class="list-item">
+                  ${m.name}
+                  <button class="btn-danger" onclick="deleteMood(${m.id})">Delete</button>
+              </li>
+          `;
+      });
+  }
+
+  async function addMood() {
+      const name = document.getElementById("newMood").value.trim();
+      if (!name) return alert("Enter a mood name");
+
+      await fetch("/api/admin/moods", {
+          method: "POST",
+          headers: {
+              "Authorization": "Bearer " + getJwt(),
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ name })
+      });
+
+      document.getElementById("newMood").value = "";
+      loadMoods();
+  }
+
+  async function deleteMood(id) {
+      await fetch(`/api/admin/moods/${id}`, {
+          method: "DELETE",
+          headers: { "Authorization": "Bearer " + getJwt() }
+      });
+
+      loadMoods();
+  }
+
+  loadMoods();
+</script>
+
+</body>
+</html>

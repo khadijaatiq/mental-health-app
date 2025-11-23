@@ -23,6 +23,7 @@ public class EmotionTagController {
     }
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EmotionTag> createTag(@RequestBody EmotionTag tag) {
         try {
             EmotionTag created = emotionTagService.createTag(tag);
@@ -33,6 +34,7 @@ public class EmotionTagController {
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteTag(@PathVariable Long id) {
         emotionTagService.deleteTag(id);
         return ResponseEntity.noContent().build();

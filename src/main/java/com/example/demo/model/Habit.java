@@ -24,10 +24,12 @@ public class Habit {
     private String habitName;
     private String frequency;
     private LocalDateTime createdAt;
-    private LocalDate dateCompleted;
+    private LocalDate lastCompletedDate;
+    private int streak;
+
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-
 }
+
