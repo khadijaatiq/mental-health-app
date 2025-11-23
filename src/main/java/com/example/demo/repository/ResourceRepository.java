@@ -2,6 +2,7 @@ package com.example.demo.repository;
 
 import com.example.demo.model.Resource;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -13,6 +14,9 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
     List<Resource> findByCategory_Name(String categoryName);
 
     List<Resource> findByTitleContainingIgnoreCase(String keyword);
+    @Modifying
+    @Query("UPDATE Resource r SET r.category = NULL WHERE r.category.id = :catId")
+    void removeCategoryFromResources(Long catId);
 
     List<Resource> findByCategory_NameAndTitleContainingIgnoreCase(String categoryName, String keyword);
 

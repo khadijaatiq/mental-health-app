@@ -4,6 +4,7 @@ import com.example.demo.dto.MoodDTO;
 import com.example.demo.model.Mood;
 import com.example.demo.model.User;
 import com.example.demo.service.MoodService;
+import com.example.demo.service.UserActivityService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,9 +18,10 @@ import java.util.Map;
 public class MoodController {
 
     private final MoodService moodService;
-
-    public MoodController(MoodService moodService) {
+    private final UserActivityService userActivityService;
+    public MoodController(MoodService moodService, UserActivityService userActivityService) {
         this.moodService = moodService;
+        this.userActivityService = userActivityService;
     }
 
     @PostMapping
@@ -31,6 +33,7 @@ public class MoodController {
         mood.setDate(moodDTO.getDate());
 
         Mood saved = moodService.createMood(mood);
+        userActivityService.logActivity(user, "MOOD_LOGGED", "Logged mood: " + saved.getMoodLevel());
         return ResponseEntity.ok(saved);
     }
 
@@ -51,6 +54,7 @@ public class MoodController {
             mood.setMoodLevel(moodDTO.getMoodLevel());
             mood.setIntensity(moodDTO.getIntensity());
             Mood updated = moodService.updateMood(mood);
+            userActivityService.logActivity(user, "MOOD_UPDATED", "Updated mood ID: " + id);
             return ResponseEntity.ok(updated);
         }
         return ResponseEntity.notFound().build();
@@ -61,6 +65,7 @@ public class MoodController {
         Mood mood = moodService.getMood(id);
         if (mood != null && mood.getUser().getId().equals(user.getId())) {
             moodService.deleteMood(id);
+            userActivityService.logActivity(user, "MOOD_DELETED", "Deleted mood ID: " + id);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();

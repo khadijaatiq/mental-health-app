@@ -73,29 +73,9 @@ public class AdminController {
     }
 
     @GetMapping("/stats/trends")
-    public ResponseEntity<Map<String, Object>> getUsageTrends() {
-        // Mock data for trends (in a real app, this would query the DB with group by
-        // date)
-        Map<String, Object> trends = new HashMap<>();
-
-        // Last 7 days activity
-        List<String> labels = new ArrayList<>();
-        List<Integer> logins = new ArrayList<>();
-        List<Integer> posts = new ArrayList<>();
-
-        LocalDate today = LocalDate.now();
-        for (int i = 6; i >= 0; i--) {
-            LocalDate date = today.minusDays(i);
-            labels.add(date.toString());
-            // Mock random data for demo
-            logins.add((int) (Math.random() * 50) + 10);
-            posts.add((int) (Math.random() * 20) + 5);
-        }
-
-        trends.put("labels", labels);
-        trends.put("logins", logins);
-        trends.put("posts", posts);
-
+    public ResponseEntity<Map<String, Object>> getUsageTrends(
+            @RequestParam(defaultValue = "7") int days) {
+        Map<String, Object> trends = userActivityService.getActivityTrends(days);
         return ResponseEntity.ok(trends);
     }
 

@@ -6,6 +6,7 @@ import com.example.demo.model.Journal;
 import com.example.demo.model.User;
 import com.example.demo.service.EmotionTagService;
 import com.example.demo.service.JournalService;
+import com.example.demo.service.UserActivityService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +24,12 @@ public class JournalController {
     private final JournalService journalService;
     private final EmotionTagService emotionTagService;
 
-    public JournalController(JournalService journalService, EmotionTagService emotionTagService) {
+    private final UserActivityService userActivityService;
+
+    public JournalController(JournalService journalService, EmotionTagService emotionTagService, UserActivityService userActivityService) {
         this.journalService = journalService;
         this.emotionTagService = emotionTagService;
+        this.userActivityService = userActivityService;
     }
 
     @PostMapping
@@ -47,6 +51,7 @@ public class JournalController {
         }
 
         Journal saved = journalService.createJournal(journal);
+        userActivityService.logActivity(user, "JOURNAL_CREATED", "Created journal entry for " + saved.getDate());
         return ResponseEntity.ok(saved);
     }
 
@@ -120,6 +125,7 @@ public class JournalController {
             }
 
             Journal updated = journalService.updateJournal(journal);
+            userActivityService.logActivity(user, "JOURNAL_UPDATED", "Updated journal entry ID: " + id);
             return ResponseEntity.ok(updated);
         }
         return ResponseEntity.notFound().build();
@@ -130,6 +136,7 @@ public class JournalController {
         Journal journal = journalService.getJournalById(id);
         if (journal != null && journal.getUser().getId().equals(user.getId())) {
             journalService.deleteJournal(id);
+            userActivityService.logActivity(user, "JOURNAL_DELETED", "Deleted journal entry ID: " + id);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();

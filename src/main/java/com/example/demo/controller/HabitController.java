@@ -4,6 +4,7 @@ import com.example.demo.dto.HabitDTO;
 import com.example.demo.model.Habit;
 import com.example.demo.model.User;
 import com.example.demo.service.HabitService;
+import com.example.demo.service.UserActivityService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,9 +18,11 @@ import java.util.Map;
 public class HabitController {
 
     private final HabitService habitService;
+    private final UserActivityService userActivityService;
 
-    public HabitController(HabitService habitService) {
+    public HabitController(HabitService habitService, UserActivityService userActivityService) {
         this.habitService = habitService;
+        this.userActivityService = userActivityService;
     }
 
     @PostMapping
@@ -30,6 +33,7 @@ public class HabitController {
         habit.setFrequency(habitDTO.getFrequency());
 
         Habit saved = habitService.createHabit(habit);
+        userActivityService.logActivity(user, "HABIT_CREATED", "Created habit");
         return ResponseEntity.ok(saved);
     }
 
@@ -92,6 +96,7 @@ public class HabitController {
             habit.setHabitName(habitDTO.getHabitName());
             habit.setFrequency(habitDTO.getFrequency());
             Habit updated = habitService.updateHabit(habit);
+            userActivityService.logActivity(user, "HABIT_UPDATED", "Updated habit ID: " + id);
             return ResponseEntity.ok(updated);
         }
         return ResponseEntity.notFound().build();
@@ -102,6 +107,7 @@ public class HabitController {
         Habit habit = habitService.getHabitById(id);
         if (habit != null && habit.getUser().getId().equals(user.getId())) {
             habitService.deleteHabit(id);
+            userActivityService.logActivity(user, "HABIT_DELETED", "Deleted habit ID: " + id);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
@@ -114,6 +120,7 @@ public class HabitController {
         Habit habit = habitService.getHabitById(id);
         if (habit != null && habit.getUser().getId().equals(user.getId())) {
             Habit completed = habitService.checkInHabit(id);
+            userActivityService.logActivity(user, "HABIT_CHECKED_IN", "Checked in habit: " + habit.getHabitName());
             return ResponseEntity.ok(completed);
         }
 

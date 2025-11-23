@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.Stress;
 import com.example.demo.model.User;
 import com.example.demo.service.StressService;
+import com.example.demo.service.UserActivityService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,14 +18,18 @@ public class StressController {
 
     private final StressService stressService;
 
-    public StressController(StressService stressService) {
+    private final UserActivityService userActivityService;
+
+    public StressController(StressService stressService, UserActivityService userActivityService) {
         this.stressService = stressService;
+        this.userActivityService = userActivityService;
     }
 
     @PostMapping
     public ResponseEntity<Stress> create(@RequestBody Stress stress, @AuthenticationPrincipal User user) {
         stress.setUser(user);
         Stress saved = stressService.createStress(stress);
+        userActivityService.logActivity(user, "STRESS_LOGGED", "Logged stress level: " + saved.getStressLevel());
         return ResponseEntity.ok(saved);
     }
 
@@ -68,6 +73,7 @@ public class StressController {
             stress.setStressLevel(stressUpdate.getStressLevel());
             stress.setNotes(stressUpdate.getNotes());
             Stress updated = stressService.updateStress(stress);
+            userActivityService.logActivity(user, "STRESS_UPDATED", "Updated stress log ID: " + id);
             return ResponseEntity.ok(updated);
         }
         return ResponseEntity.notFound().build();
@@ -78,6 +84,7 @@ public class StressController {
         Stress stress = stressService.getStress(id);
         if (stress != null && stress.getUser().getId().equals(user.getId())) {
             stressService.deleteStress(id);
+            userActivityService.logActivity(user, "STRESS_DELETED", "Deleted stress log ID: " + id);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();

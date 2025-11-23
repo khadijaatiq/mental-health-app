@@ -4,6 +4,7 @@ import com.example.demo.dto.GoalDTO;
 import com.example.demo.model.Goal;
 import com.example.demo.model.User;
 import com.example.demo.service.GoalService;
+import com.example.demo.service.UserActivityService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +16,11 @@ public class GoalController {
 
     private final GoalService goalService;
 
-    public GoalController(GoalService goalService) {
+    private final UserActivityService userActivityService;
+
+    public GoalController(GoalService goalService, UserActivityService userActivityService) {
         this.goalService = goalService;
+        this.userActivityService = userActivityService;
     }
 
     @PostMapping
@@ -29,6 +33,7 @@ public class GoalController {
         goal.setStatus(goalDTO.getStatus() != null ? goalDTO.getStatus() : "pending");
 
         Goal saved = goalService.createGoal(goal);
+        userActivityService.logActivity(user, "GOAL_CREATED", "Created goal: " + saved.getTitle());
         return ResponseEntity.ok(saved);
     }
 
@@ -57,6 +62,7 @@ public class GoalController {
         Goal goal = goalService.getGoalById(id);
         if (goal != null && goal.getUser().getId().equals(user.getId())) {
             Goal completed = goalService.markGoalAsCompleted(id);
+            userActivityService.logActivity(user, "GOAL_COMPLETED", "Completed goal: " + goal.getTitle());
             return ResponseEntity.ok(completed);
         }
         return ResponseEntity.notFound().build();
@@ -80,6 +86,7 @@ public class GoalController {
             goal.setTargetDate(goalDTO.getTargetDate());
             goal.setStatus(goalDTO.getStatus());
             Goal updated = goalService.updateGoal(goal);
+            userActivityService.logActivity(user, "GOAL_UPDATED", "Updated goal ID: " + id);
             return ResponseEntity.ok(updated);
         }
         return ResponseEntity.notFound().build();
@@ -90,6 +97,7 @@ public class GoalController {
         Goal goal = goalService.getGoalById(id);
         if (goal != null && goal.getUser().getId().equals(user.getId())) {
             goalService.deleteGoal(id);
+            userActivityService.logActivity(user, "GOAL_DELETED", "Deleted goal ID: " + id);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
