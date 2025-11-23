@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.User;
 import com.example.demo.service.ExportService;
+import com.example.demo.service.UserActivityService;
 import com.itextpdf.text.DocumentException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -17,8 +18,11 @@ public class ExportController {
 
     private final ExportService exportService;
 
-    public ExportController(ExportService exportService) {
+    private final UserActivityService userActivityService;
+
+    public ExportController(ExportService exportService, UserActivityService userActivityService) {
         this.exportService = exportService;
+        this.userActivityService = userActivityService;
     }
 
     @GetMapping("/pdf")
@@ -36,7 +40,7 @@ public class ExportController {
 
         try {
             byte[] pdfBytes = exportService.exportUserDataToPDF(user, startDate, endDate);
-
+            userActivityService.logActivity(user, "DATA_EXPORTED", "Exported data to PDF");
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
             headers.setContentDispositionFormData("attachment", "mindtrack-report.pdf");
@@ -64,7 +68,7 @@ public class ExportController {
         }
 
         String csv = exportService.exportUserDataToCSV(user, startDate, endDate);
-
+        userActivityService.logActivity(user, "DATA_EXPORTED", "Exported data to CSV");
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("text/csv"));
         headers.setContentDispositionFormData("attachment", "mindtrack-data.csv");
