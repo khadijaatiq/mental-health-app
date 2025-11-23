@@ -3,8 +3,9 @@
 
 <head>
     <title>Admin - Manage Resources - MindTrack</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <style>
         :root {
             --primary: #6366f1;
@@ -20,11 +21,12 @@
 
         body {
             margin: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: "Inter", sans-serif;
             background-color: var(--bg);
             color: var(--text);
         }
 
+        /* NAVBAR */
         .navbar {
             background-color: var(--surface);
             padding: 1rem 2rem;
@@ -38,7 +40,6 @@
             font-size: 1.5rem;
             font-weight: 700;
             background: linear-gradient(to right, #818cf8, #c084fc);
-            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -47,6 +48,7 @@
             color: var(--text-muted);
             text-decoration: none;
             margin-left: 1.5rem;
+            font-size: 0.95rem;
             transition: color 0.2s;
         }
 
@@ -54,6 +56,7 @@
             color: var(--text);
         }
 
+        /* MAIN */
         .container {
             padding: 2rem;
             max-width: 1200px;
@@ -67,6 +70,12 @@
             margin-bottom: 2rem;
         }
 
+        h2 {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        /* CARDS */
         .card {
             background-color: var(--surface);
             padding: 1.5rem;
@@ -75,6 +84,7 @@
             margin-bottom: 1.5rem;
         }
 
+        /* FORM */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -97,11 +107,10 @@
         textarea {
             width: 100%;
             padding: 0.75rem;
-            background-color: rgba(0, 0, 0, 0.2);
+            background-color: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 0.5rem;
             color: var(--text);
-            box-sizing: border-box;
         }
 
         button {
@@ -137,18 +146,19 @@
             color: white;
         }
 
+        /* RESOURCE LIST */
         .resource-list {
             display: grid;
             gap: 1rem;
         }
 
         .resource-item {
-            background-color: rgba(255, 255, 255, 0.03);
+            background-color: rgba(255, 255, 255, 0.05);
             padding: 1rem;
             border-radius: 0.5rem;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: start;
         }
 
         .resource-info h4 {
@@ -156,7 +166,7 @@
         }
 
         .resource-info p {
-            margin: 0;
+            margin: 0 0 0.3rem 0;
             color: var(--text-muted);
             font-size: 0.875rem;
         }
@@ -165,132 +175,206 @@
             display: flex;
             gap: 0.5rem;
         }
+    </style>
+</head>
 
-        <button class="btn-warning" onclick="loadDefaults()">Load Default Resources</button></div>< !-- Add/Edit Form --><div class="card"><h3 id="formTitle">Add New Resource</h3><form id="resourceForm"><input type="hidden" id="resourceId"><div class="form-grid"><div class="form-group"><label>Title</label><input type="text" id="title" required></div><div class="form-group"><label>Category</label><select id="category" required><option value="Meditation">Meditation</option><option value="Stress Management">Stress Management</option><option value="Depression Support">Depression Support</option><option value="Mindfulness">Mindfulness</option><option value="Anxiety Relief">Anxiety Relief</option><option value="General Wellness">General Wellness</option></select></div><div class="form-group" style="grid-column: span 2;"><label>Description</label><textarea id="description" rows="3"></textarea></div><div class="form-group"><label>External Link</label><input type="url" id="link"></div><div class="form-group"><label>Upload File</label><input type="file" id="file"></div></div><div style="margin-top: 1rem; display: flex; gap: 1rem;"><button type="submit" class="btn-primary">Save Resource</button><button type="button" onclick="resetForm()"
+<body>
 
-        style="background: transparent; color: var(--text-muted); border: 1px solid var(--text-muted);">Cancel</button></div></form></div>< !-- List --><div class="resource-list" id="resourceList">< !-- Loaded via JS --></div></div><script>function logout() {
-            document.cookie="JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            window.location.href='/login';
-        }
+<!-- NAVIGATION -->
+<div class="navbar">
+    <div class="logo">MindTrack Admin</div>
 
-        async function loadResources() {
-            const response=await fetch('/api/resources');
-            const resources=await response.json();
-            const list=document.getElementById('resourceList');
+    <div class="nav-links">
+        <a href="/admin/board">Board</a>
+        <a href="/admin/users">Users</a>
+        <a href="/admin/reports">Reports</a>
+        <a href="/admin/settings">Settings</a>
+        <a href="/admin/resources" style="color: var(--primary); font-weight: 600;">Resources</a>
+        <a href="javascript:logout()">Logout</a>
+    </div>
+</div>
 
-            list.innerHTML=resources.map(r=> ` <div class="resource-item" > <div class="resource-info" > <h4>$ {
-                    r.title
-                }
+<div class="container">
 
-                <span style="font-size:0.75rem; background:rgba(99,102,241,0.2); color:#818cf8; padding:0.1rem 0.4rem; border-radius:4px; margin-left:0.5rem;" >$ {
-                    r.category
-                }
+    <div class="header">
+        <h2>Manage Resources</h2>
+        <button class="btn-warning" onclick="loadDefaults()">Load Default Resources</button>
+    </div>
 
-                </span></h4> <p>$ {
-                    r.description || 'No description'
-                }
+    <!-- ADD / EDIT FORM -->
+    <div class="card">
+        <h3 id="formTitle">Add New Resource</h3>
 
-                </p> $ {
-                    r.link ? `<a href="${r.link}" target="_blank" style="color:var(--primary); font-size:0.875rem;" >External Link</a>` : ''
-                }
+        <form id="resourceForm">
+            <input type="hidden" id="resourceId">
 
-                $ {
-                    r.fileUrl ? `<a href="/${r.fileUrl}" target="_blank" style="color:var(--success); font-size:0.875rem; margin-left:1rem;" >Download File</a>` : ''
-                }
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="title" required>
+                </div>
 
-                </div> <div class="actions" > <button class="btn-primary" onclick='editResource(${JSON.stringify(r).replace(/' /g, "&#39;")
-        })'>Edit</button>
- <button class="btn-danger" onclick="deleteResource(${r.id})">Delete</button></div></div>`).join('');
-        }
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="category" required>
+                        <option value="Meditation">Meditation</option>
+                        <option value="Stress Management">Stress Management</option>
+                        <option value="Depression Support">Depression Support</option>
+                        <option value="Mindfulness">Mindfulness</option>
+                        <option value="Anxiety Relief">Anxiety Relief</option>
+                        <option value="General Wellness">General Wellness</option>
+                    </select>
+                </div>
 
-        async function loadDefaults() {
-            if ( !confirm('Load default resources? This will add duplicates if they already exist.')) return;
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Description</label>
+                    <textarea id="description" rows="3"></textarea>
+                </div>
 
-            await fetch('/api/resources/load-defaults', {
-                method: 'POST'
-            });
+                <div class="form-group">
+                    <label>External Link</label>
+                    <input type="url" id="link">
+                </div>
+
+                <div class="form-group">
+                    <label>Upload File</label>
+                    <input type="file" id="file">
+                </div>
+            </div>
+
+            <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                <button type="submit" class="btn-primary">Save Resource</button>
+                <button type="button" onclick="resetForm()" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted);">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- RESOURCE LIST -->
+    <div class="resource-list" id="resourceList"></div>
+
+</div>
+
+<script>
+    function logout() {
+        document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.href = '/login';
+    }
+
+    async function loadResources() {
+        const response = await fetch('/api/resources');
+        const resources = await response.json();
+        const list = document.getElementById('resourceList');
+
+        list.innerHTML = resources
+            .map(
+                r => `
+            <div class="resource-item">
+                <div class="resource-info">
+                    <h4>${r.title}
+                        <span style="font-size:0.75rem; background:rgba(99,102,241,0.2); color:#818cf8; padding:0.1rem 0.4rem; border-radius:4px; margin-left:0.5rem;">
+                            ${r.category}
+                        </span>
+                    </h4>
+
+                    <p>${r.description || "No description"}</p>
+
+                    ${r.link ? `<a href="${r.link}" target="_blank" style="color:var(--primary); font-size:0.875rem;">External Link</a>` : ""}
+                    ${r.fileUrl ? `<a href="/${r.fileUrl}" target="_blank" style="color:var(--success); font-size:0.875rem; margin-left:0.7rem;">Download File</a>` : ""}
+                </div>
+
+                <div class="actions">
+                    <button class="btn-primary" onclick='editResource(${JSON.stringify(r).replace(/'/g, "&#39;")})'>Edit</button>
+                    <button class="btn-danger" onclick="deleteResource(${r.id})">Delete</button>
+                </div>
+            </div>
+        `
+            )
+            .join('');
+    }
+
+    async function loadDefaults() {
+        if (!confirm("Load default resources? This may create duplicates.")) return;
+
+        await fetch('/api/resources/load-defaults', { method: 'POST' });
         loadResources();
-        }
+    }
 
-        async function deleteResource(id) {
-            if ( !confirm('Delete this resource?')) return;
+    async function deleteResource(id) {
+        if (!confirm("Delete this resource?")) return;
 
-            await fetch(`/api/resources/$ {
-                    id
-                }
-
-                `, {
-                method: 'DELETE'
-            });
+        await fetch(`/api/resources/${id}`, { method: 'DELETE' });
         loadResources();
-        }
+    }
 
-        function editResource(r) {
-            document.getElementById('formTitle').textContent='Edit Resource';
-            document.getElementById('resourceId').value=r.id;
-            document.getElementById('title').value=r.title;
-            document.getElementById('category').value=r.category;
-            document.getElementById('description').value=r.description;
-            document.getElementById('link').value=r.link;
-            window.scrollTo(0, 0);
-        }
+    function editResource(r) {
+        document.getElementById('formTitle').textContent = 'Edit Resource';
+        document.getElementById('resourceId').value = r.id;
+        document.getElementById('title').value = r.title;
+        document.getElementById('category').value = r.category;
+        document.getElementById('description').value =
+            r.description || '';
+        document.getElementById('link').value = r.link || '';
 
-        function resetForm() {
-            document.getElementById('resourceForm').reset();
-            document.getElementById('resourceId').value='';
-            document.getElementById('formTitle').textContent='Add New Resource';
-        }
+        window.scrollTo(0, 0);
+    }
 
-        document.getElementById('resourceForm').addEventListener('submit', async (e)=> {
-                e.preventDefault();
-                const id=document.getElementById('resourceId').value;
-                const fileInput=document.getElementById('file');
-                let fileUrl=null;
+    function resetForm() {
+        document.getElementById('resourceForm').reset();
+        document.getElementById('resourceId').value = '';
+        document.getElementById('formTitle').textContent =
+            'Add New Resource';
+    }
 
-                if (fileInput.files.length > 0) {
-                    const formData=new FormData();
-                    formData.append('file', fileInput.files[0]);
+    document
+        .getElementById('resourceForm')
+        .addEventListener('submit', async e => {
+            e.preventDefault();
 
-                    const res=await fetch('/api/resources/upload', {
-                        method: 'POST', body: formData
-                    });
-                if (res.ok) fileUrl=await res.text();
+            const id = document.getElementById('resourceId').value;
+            const fileInput = document.getElementById('file');
+            let fileUrl = null;
+
+            if (fileInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+
+                const res = await fetch('/api/resources/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (res.ok) fileUrl = await res.text();
             }
 
-            const data= {
+            const data = {
                 title: document.getElementById('title').value,
                 category: document.getElementById('category').value,
                 description: document.getElementById('description').value,
                 link: document.getElementById('link').value,
-                fileUrl: fileUrl // Note: This might clear existing file URL if not handled in backend, but for now we assume new upload replaces or null keeps old? 
-                // Actually backend update logic usually overwrites. For a robust edit, we should fetch existing if fileUrl is null.
-                // For simplicity in this iteration, we'll send what we have.
-            }
+                fileUrl: fileUrl,
+            };
 
-            ;
-
-            const method=id ? 'PUT' : 'POST';
-
-            const url=id ? `/api/resources/$ {
-                id
-            }
-
-            ` : '/api/resources';
+            const method = id ? 'PUT' : 'POST';
+            const url = id
+                ? `/api/resources/${id}`
+                : '/api/resources';
 
             await fetch(url, {
-
-                method: method,
+                method,
                 headers: {
-                    'Content-Type': 'application/json'
-                }
-
-                ,
-                body: JSON.stringify(data)
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
             });
 
-        resetForm();
-        loadResources();
+            resetForm();
+            loadResources();
         });
 
-        loadResources();
-        </script></body></html>
+    loadResources();
+</script>
+
+</body>
+</html>

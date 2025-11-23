@@ -5,30 +5,33 @@
     <title>Journal - MindTrack</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
         :root {
             --primary: #6366f1;
             --primary-dark: #4f46e5;
             --bg: #0f172a;
             --surface: #1e293b;
+            --surface-light: #243349;
             --text: #f8fafc;
             --text-muted: #94a3b8;
         }
 
         body {
             margin: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: "Inter", sans-serif;
             background-color: var(--bg);
             color: var(--text);
         }
 
+        /* Navbar */
         .navbar {
             background-color: var(--surface);
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .logo {
@@ -41,27 +44,28 @@
 
         .nav-links a {
             color: var(--text-muted);
-            text-decoration: none;
             margin-left: 1.5rem;
-            transition: color 0.2s;
+            text-decoration: none;
+            font-weight: 500;
         }
 
         .nav-links a:hover {
             color: var(--text);
         }
 
+        /* Layout */
         .container {
-            padding: 2rem;
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 880px;
+            margin: 2rem auto;
+            padding: 0 1rem;
         }
 
         .card {
             background-color: var(--surface);
             padding: 2rem;
             border-radius: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
             margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
         }
 
         h2 {
@@ -69,27 +73,22 @@
             color: var(--primary);
         }
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
         label {
-            display: block;
-            margin-bottom: 0.5rem;
             color: var(--text-muted);
+            margin-bottom: 0.4rem;
+            display: block;
         }
 
-        select,
-        input[type="date"],
-        textarea {
+        input,
+        textarea,
+        select {
             width: 100%;
             padding: 0.75rem;
-            border-radius: 0.5rem;
+            border-radius: 0.55rem;
             border: 1px solid #334155;
             background-color: #0f172a;
             color: white;
             font-size: 1rem;
-            box-sizing: border-box;
             font-family: inherit;
         }
 
@@ -99,155 +98,440 @@
         }
 
         button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            border: none;
             background-color: var(--primary);
-            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.6rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s;
+            color: white;
         }
 
         button:hover {
             background-color: var(--primary-dark);
         }
 
-        .journal-list {
-            list-style: none;
-            padding: 0;
+        /* Emotion Grid */
+        .emotion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 0.7rem;
+            margin-top: 0.5rem;
         }
 
-        .journal-item {
-            background-color: rgba(255, 255, 255, 0.03);
+        .emotion-item {
+            background-color: var(--surface-light);
+            padding: 0.6rem 0.9rem;
+            border-radius: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+
+        .emotion-item:hover {
+            background-color: #2e4260;
+        }
+
+        .emotion-item input {
+            transform: scale(1.3);
+        }
+
+        .emotion-item.active {
+            background-color: var(--primary-dark);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Entry Display */
+        .entry-display {
+            display: none;
+            background-color: var(--surface);
             padding: 1.5rem;
+            border-radius: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .entry-card {
+            background-color: var(--surface-light);
+            padding: 1.5rem;
+            border-radius: 0.8rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .entry-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .entry-emotions {
+            color: var(--primary);
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .entry-text {
+            background-color: var(--bg);
+            padding: 1rem;
             border-radius: 0.5rem;
+            white-space: pre-wrap;
+            line-height: 1.6;
             margin-bottom: 1rem;
         }
 
-        .journal-header {
+        .entry-actions {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-size: 0.875rem;
+            gap: 0.8rem;
+        }
+
+        .entry-actions button {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger {
+            background-color: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background-color: #b91c1c;
+        }
+
+        .btn-secondary {
+            background-color: #64748b;
+        }
+
+        .btn-secondary:hover {
+            background-color: #475569;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--surface);
+            padding: 2rem;
+            border-radius: 0.8rem;
+            width: 320px;
+            text-align: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
             color: var(--text-muted);
+            float: right;
+            cursor: pointer;
         }
 
-        .emotion-tag {
-            color: #818cf8;
-            font-weight: 600;
-        }
-
-        .journal-content {
-            white-space: pre-wrap;
-            line-height: 1.6;
+        .close-btn:hover {
+            color: white;
         }
     </style>
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="logo">MindTrack</div>
-        <div class="nav-links">
-            <a href="/dashboard">Dashboard</a>
-            <a href="/mood">Mood</a>
-            <a href="/journal">Journal</a>
-            <a href="/goals">Goals</a>
-            <a href="#" onclick="logout()">Logout</a>
-        </div>
-    </nav>
 
-    <div class="container">
-        <div class="card">
-            <h2>New Entry</h2>
-            <form id="journalForm">
-                <div class="form-group">
-                    <label for="emotionTag">Emotion Tag</label>
-                    <select id="emotionTag" required>
-                        <option value="GRATEFUL">Grateful</option>
-                        <option value="REFLECTIVE">Reflective</option>
-                        <option value="VENTING">Venting</option>
-                        <option value="PROUD">Proud</option>
-                        <option value="CONFUSED">Confused</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="date">Date</label>
-                    <input type="date" id="date" required>
-                </div>
-                <div class="form-group">
-                    <label for="entryText">Your Thoughts</label>
-                    <textarea id="entryText" required placeholder="Write your thoughts here..."></textarea>
-                </div>
-                <button type="submit">Save Entry</button>
-            </form>
-        </div>
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="logo">MindTrack</div>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/mood">Mood</a>
+        <a href="/journal">Journal</a>
+        <a href="/goals">Goals</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
 
-        <div class="card">
-            <h2>Recent Entries</h2>
-            <ul id="journalList" class="journal-list">
-                <!-- Entries will be loaded here -->
-            </ul>
-        </div>
+<div class="container">
+
+    <div class="card">
+        <h2 id="formTitle">New Entry</h2>
+
+        <form id="journalForm">
+            <input type="hidden" id="currentEntryId">
+
+            <label>How are you feeling?</label>
+            <div class="emotion-grid" id="emotionGrid"></div>
+
+            <label for="date">Date</label>
+            <input type="date" id="date" required>
+
+            <label for="entryText">Your Thoughts</label>
+            <textarea id="entryText" placeholder="What's on your mind?" required></textarea>
+
+            <button type="submit" style="margin-top: 1rem;">Save Entry</button>
+            <button type="button" style="margin-top: 1rem; margin-left: 0.5rem;" class="btn-secondary" onclick="cancelEdit()">Cancel</button>
+        </form>
+
+        <button style="margin-top: 1rem; width: 100%;" onclick="openDatePicker()">
+            View Past Entries
+        </button>
     </div>
 
-    <script>
-        // Set default date to today
-        document.getElementById('date').valueAsDate = new Date();
+    <!-- Entry Display Card -->
+    <div id="entryDisplay" class="entry-display"></div>
+</div>
 
-        function logout() {
-            document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            window.location.href = '/login';
-        }
+<!-- Date Picker Modal -->
+<div class="modal" id="datePickerModal">
+    <div class="modal-content date-picker-modal">
+        <div class="modal-header">
+            <h3>Select Date</h3>
+            <button class="close-btn" onclick="closeDatePickerModal()">×</button>
+        </div>
 
-        async function loadJournals() {
-            try {
-                const response = await fetch('/api/journals');
-                if (response.ok) {
-                    const journals = await response.json();
-                    const list = document.getElementById('journalList');
-                    list.innerHTML = journals.map(journal => `
-                        <li class="journal-item">
-                            <div class="journal-header">
-                                <span class="emotion-tag">#${journal.emotionTag}</span>
-                                <span>${journal.date}</span>
-                            </div>
-                            <div class="journal-content">${journal.entryText}</div>
-                        </li>
-                    `).join('');
-                }
-            } catch (error) {
-                console.error('Error loading journals:', error);
-            }
-        }
+        <div class="form-group">
+            <label for="pickerDate">Choose a date to view entries</label>
+            <input type="date" id="pickerDate" class="date-picker-input">
+        </div>
 
-        document.getElementById('journalForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const emotionTag = document.getElementById('emotionTag').value;
-            const date = document.getElementById('date').value;
-            const entryText = document.getElementById('entryText').value;
+        <button class="btn btn-primary" onclick="viewEntriesByDate()" style="width: 100%;">
+            View Entries
+        </button>
+    </div>
+</div>
 
-            try {
-                const response = await fetch('/api/journals', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ emotionTag, date, entryText })
-                });
+<script>
+    async function loadEmotionTags() {
+        const res = await fetch("/api/tags");
+        const tags = await res.json();
 
-                if (response.ok) {
-                    loadJournals();
-                    e.target.reset();
-                    document.getElementById('date').valueAsDate = new Date();
-                }
-            } catch (error) {
-                console.error('Error saving journal:', error);
-            }
+        const grid = document.getElementById("emotionGrid");
+        grid.innerHTML = "";
+
+        tags.forEach(tag => {
+            const div = document.createElement("label");
+            div.className = "emotion-item";
+            div.innerHTML = `
+                <input type="checkbox" value="${tag.name}">
+                <span>${tag.name}</span>
+            `;
+
+            div.onclick = () => div.classList.toggle("active");
+
+            grid.appendChild(div);
+        });
+    }
+
+    document.getElementById("date").valueAsDate = new Date();
+
+    /* Save Entry */
+    document.getElementById("journalForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const id = document.getElementById("currentEntryId").value;
+
+        const selected = [...document.querySelectorAll("#emotionGrid input:checked")]
+            .map(c => c.value);
+
+        const payload = {
+            entryText: document.getElementById("entryText").value,
+            date: document.getElementById("date").value,
+            emotionTags: selected
+        };
+
+        const method = id ? "PUT" : "POST";
+        const url = id ? `/api/journals/${id}` : "/api/journals";
+
+        const res = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
         });
 
-        loadJournals();
-    </script>
-</body>
+        if (res.ok) {
+            alert("Saved!");
+            resetForm();
+            // If we were viewing entries, refresh them
+            const displayBox = document.getElementById("entryDisplay");
+            if (displayBox.style.display === "block") {
+                const pickedDate = document.getElementById("date").value;
+                await refreshEntriesForDate(pickedDate);
+            }
+        }
+    });
 
+    /* Picker Modal */
+    function openDatePicker() {
+        document.getElementById("datePickerModal").style.display = "flex";
+    }
+
+    function closeDatePickerModal() {
+        document.getElementById("datePickerModal").style.display = "none";
+    }
+
+    async function viewEntriesByDate() {
+        const pickedDate = document.getElementById("pickerDate").value;
+
+        if (!pickedDate) {
+            alert("Please select a date.");
+            return;
+        }
+
+        await refreshEntriesForDate(pickedDate);
+        closeDatePickerModal();
+    }
+
+    async function refreshEntriesForDate(date) {
+        const response = await fetch(`/api/journals/date?date=${date}`);
+        console.log("Fetching journal entries for date:", date);
+        console.log("Response status:", response.status);
+
+        if (!response.ok) {
+            alert("No journal entries found for that date.");
+            document.getElementById("entryDisplay").style.display = "none";
+            return;
+        }
+
+        const journalEntries = await response.json();
+        console.log("Journal entries received:", journalEntries);
+
+        if (!Array.isArray(journalEntries)) {
+            alert("Unexpected response format from server.");
+            console.error("Expected array but got:", journalEntries);
+            return;
+        }
+
+        showEntries(journalEntries);
+    }
+
+    function showEntries(entries) {
+        const box = document.getElementById("entryDisplay");
+        box.style.display = "block";
+        box.innerHTML = '';
+
+        if (!entries.length) {
+            box.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No entries found for this date.</p>';
+            return;
+        }
+
+        // Show date header
+        const dateHeader = document.createElement('h3');
+        dateHeader.textContent = `Entries for ${entries[0].date}`;
+        dateHeader.style.marginBottom = '1.5rem';
+        box.appendChild(dateHeader);
+
+        // Create a card for each entry
+        entries.forEach(entry => {
+            const emotions = entry.emotionTags.map(t => t.name).join(", ");
+
+            const entryCard = document.createElement('div');
+            entryCard.className = 'entry-card';
+
+            const emotionP = document.createElement('div');
+            emotionP.className = 'entry-emotions';
+            emotionP.innerHTML = `<strong>Emotions:</strong> ${emotions}`;
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'entry-text';
+            textDiv.textContent = entry.entryText;
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'entry-actions';
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Edit';
+            editBtn.onclick = () => editEntry(entry.id);
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-danger';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.onclick = () => deleteEntry(entry.id, entry.date);
+
+            actionsDiv.appendChild(editBtn);
+            actionsDiv.appendChild(deleteBtn);
+
+            entryCard.appendChild(emotionP);
+            entryCard.appendChild(textDiv);
+            entryCard.appendChild(actionsDiv);
+
+            box.appendChild(entryCard);
+        });
+    }
+
+    async function editEntry(entryId) {
+        try {
+            const res = await fetch(`/api/journals/${entryId}`);
+
+            if (!res.ok) {
+                alert("Failed to load entry. Please try again.");
+                console.error("Failed to fetch entry:", res.status);
+                return;
+            }
+
+            const entry = await res.json();
+            console.log("Loaded entry:", entry);
+
+            document.getElementById("currentEntryId").value = entry.id || '';
+            document.getElementById("date").value = entry.date || '';
+            document.getElementById("entryText").value = entry.entryText || '';
+
+            // Safely handle emotion tags
+            const emotionTags = entry.emotionTags || [];
+            document.querySelectorAll("#emotionGrid input").forEach(c => {
+                c.checked = emotionTags.some(t => t.name === c.value);
+                c.parentElement.classList.toggle("active", c.checked);
+            });
+
+            document.getElementById("formTitle").textContent = "Edit Entry";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (error) {
+            console.error("Error loading entry:", error);
+            alert("An error occurred while loading the entry.");
+        }
+    }
+
+    async function deleteEntry(entryId, entryDate) {
+        if (!confirm("Are you sure you want to delete this entry?")) return;
+
+        const res = await fetch(`/api/journals/${entryId}`, { method: "DELETE" });
+
+        if (res.ok) {
+            alert("Entry deleted successfully!");
+            // Refresh the entries for this date
+            await refreshEntriesForDate(entryDate);
+        } else {
+            alert("Failed to delete entry.");
+        }
+    }
+
+    function cancelEdit() {
+        resetForm();
+    }
+
+    function resetForm() {
+        document.getElementById("journalForm").reset();
+        document.getElementById("formTitle").textContent = "New Entry";
+        document.getElementById("currentEntryId").value = "";
+        document.getElementById("date").valueAsDate = new Date();
+
+        // Reset emotion checkboxes
+        document.querySelectorAll("#emotionGrid input").forEach(c => {
+            c.checked = false;
+            c.parentElement.classList.remove("active");
+        });
+    }
+
+    function logout() {
+        window.location.href = "/logout";
+    }
+
+    loadEmotionTags();
+</script>
+
+</body>
 </html>

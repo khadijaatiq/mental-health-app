@@ -5,7 +5,9 @@
     <title>Admin - Reports & Analytics - MindTrack</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         :root {
             --primary: #6366f1;
@@ -93,10 +95,6 @@
             font-weight: 600;
         }
 
-        button:hover {
-            opacity: 0.9;
-        }
-
         .activity-list {
             max-height: 400px;
             overflow-y: auto;
@@ -112,132 +110,145 @@
             color: var(--text-muted);
             font-size: 0.75rem;
         }
+    </style>
+</head>
 
-        <div class="grid-2">< !-- Usage Chart --><div class="card"><h3>Weekly Activity Trends</h3><canvas id="usageChart"></canvas></div>< !-- Recent Activity --><div class="card"><h3>Recent User Activity</h3><div class="activity-list" id="activityList">< !-- Loaded via JS --></div></div></div>< !-- Exports --><div class="card"><h3>Data Exports</h3><p style="color: var(--text-muted); margin-bottom: 1.5rem;">Download system-wide data for analysis or backup.</p><div class="export-section"><button onclick="exportData('system')">Full System Export (CSV)</button><button onclick="exportData('moods')">Mood Logs</button><button onclick="exportData('stress')">Stress Logs</button><button onclick="exportData('users')">User List</button></div></div></div><script>function logout() {
-            document.cookie="JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            window.location.href='/login';
-        }
+<body>
 
-        async function loadTrends() {
-            try {
-                const response=await fetch('/api/admin/stats/trends');
+<div class="navbar">
+    <div class="logo">MindTrack Admin</div>
+    <div class="nav-links">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/reports">Reports</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</div>
 
-                if (response.ok) {
-                    const data=await response.json();
-                    renderChart(data);
-                }
+<div class="container">
+
+    <div class="grid-2">
+        <!-- Usage Chart -->
+        <div class="card">
+            <h3>Weekly Activity Trends</h3>
+            <canvas id="usageChart"></canvas>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+            <h3>Recent User Activity</h3>
+            <div class="activity-list" id="activityList">
+                <!-- Loaded via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Exports -->
+    <div class="card">
+        <h3>Data Exports</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+            Download system-wide data for analysis or backup.
+        </p>
+
+        <div class="export-section">
+            <button onclick="exportData('system')">Full System Export (CSV)</button>
+            <button onclick="exportData('moods')">Mood Logs</button>
+            <button onclick="exportData('stress')">Stress Logs</button>
+            <button onclick="exportData('users')">User List</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function logout() {
+        document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.href = '/login';
+    }
+
+    // Load Weekly Trends
+    async function loadTrends() {
+        try {
+            const response = await fetch('/api/admin/stats/trends');
+
+            if (response.ok) {
+                const data = await response.json();
+                renderChart(data);
             }
-
-            catch (error) {
-                console.error('Error loading trends:', error);
-            }
+        } catch (error) {
+            console.error('Error loading trends:', error);
         }
+    }
 
-        function renderChart(data) {
-            const ctx=document.getElementById('usageChart').getContext('2d');
+    function renderChart(data) {
+        const ctx = document.getElementById('usageChart').getContext('2d');
 
-            new Chart(ctx, {
-
-                type: 'line',
-                data: {
-
-                    labels: data.labels,
-                    datasets: [ {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
                         label: 'Active Users',
                         data: data.logins,
                         borderColor: '#6366f1',
                         tension: 0.4
+                    },
+                    {
+                        label: 'New Posts',
+                        data: data.posts,
+                        borderColor: '#10b981',
+                        tension: 0.4
                     }
-
-                    , {
-                    label: 'New Posts',
-                    data: data.posts,
-                    borderColor: '#10b981',
-                    tension: 0.4
-                }
-
                 ]
-            }
-
-            ,
+            },
             options: {
-
                 responsive: true,
                 plugins: {
-                    legend: {
-                        labels: {
-                            color: '#94a3b8'
-                        }
-                    }
-                }
-
-                ,
+                    legend: { labels: { color: '#94a3b8' } }
+                },
                 scales: {
                     y: {
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
-                        }
-
-                        ,
-                        ticks: {
-                            color: '#94a3b8'
-                        }
-                    }
-
-                    ,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#94a3b8' }
+                    },
                     x: {
-                        grid: {
-                            display: false
-                        }
-
-                        ,
-                        ticks: {
-                            color: '#94a3b8'
-                        }
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8' }
                     }
                 }
             }
         });
-        }
+    }
 
-        async function loadActivity() {
-            try {
-                const response=await fetch('/api/admin/activity');
+    // Load Activity List
+    async function loadActivity() {
+        try {
+            const response = await fetch('/api/admin/activity');
 
-                if (response.ok) {
-                    const activities=await response.json();
-                    const list=document.getElementById('activityList');
+            if (response.ok) {
+                const activities = await response.json();
 
-                    list.innerHTML=activities.map(a=> ` <div class="activity-item" > <div><strong>$ {
-                            a.user ? a.user.username : 'System'
-                        }
-
-                        </strong>: $ {
-                            a.action
-                        }
-
-                        </div> <div class="activity-time" >$ {
-                            new Date(a.timestamp).toLocaleString()
-                        }
-
-                        </div> </div> `).join('');
-                }
+                document.getElementById('activityList').innerHTML =
+                    activities.map(a => `
+                    <div class="activity-item">
+                        <div><strong>${a.user ? a.user.username : 'System'}</strong>: ${a.action}</div>
+                        <div class="activity-time">${new Date(a.timestamp).toLocaleString()}</div>
+                    </div>
+                `).join('');
             }
-
-            catch (error) {
-                console.error('Error loading activity:', error);
-            }
+        } catch (error) {
+            console.error('Error loading activity:', error);
         }
+    }
 
-        function exportData(type) {
-            window.location.href=`/api/admin/export/$ {
-                type
-            }
+    function exportData(type) {
+        window.location.href = `/api/admin/export/${type}`;
+    }
 
-            `;
-        }
+    // Init
+    loadTrends();
+    loadActivity();
+</script>
 
-        // Init
-        loadTrends();
-        loadActivity();
-        </script></body></html>
+</body>
+</html>
