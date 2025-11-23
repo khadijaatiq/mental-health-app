@@ -1,10 +1,613 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+
 <head>
+    <title>Admin - Reports & Analytics - MindTrack</title>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        .navbar {
+            background-color: var(--surface);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        h3 {
+            margin-top: 0;
+            color: var(--text);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--surface), #243349);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--surface);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        select {
+            padding: 0.75rem 1rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        /* Activity List */
+        .activity-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 1rem;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-user {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .activity-action {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .activity-time {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        /* Export Section */
+        .export-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary);
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        /* Scrollbar */
+        .activity-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .activity-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .activity-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .activity-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+    </style>
 </head>
+
 <body>
+
+<div class="navbar">
+    <div class="logo">MindTrack Admin</div>
+    <div class="nav-links">
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/users">Users</a>
+        <a href="/admin/reports">Reports</a>
+        <a href="/admin/resources">Resources</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2>Reports & Analytics</h2>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Users</div>
+            <div class="stat-value" id="totalUsers">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Posts</div>
+            <div class="stat-value" id="totalPosts">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Flagged Posts</div>
+            <div class="stat-value" id="flaggedPosts">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Active Alerts</div>
+            <div class="stat-value" id="activeAlerts">0</div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+        <!-- Line Chart -->
+        <div class="card">
+            <div class="filters">
+                <h3>Activity Trends</h3>
+                <select id="timeRange" onchange="loadTrends()" style="margin-left: auto;">
+                    <option value="7">Last 7 Days</option>
+                    <option value="14">Last 14 Days</option>
+                    <option value="30">Last 30 Days</option>
+                </select>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="trendsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+            <h3>Recent Activity</h3>
+            <div class="activity-list" id="activityList">
+                <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                    Loading...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Breakdown Chart -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3>Activity Breakdown</h3>
+        <div class="chart-wrapper">
+            <canvas id="breakdownChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Exports -->
+    <div class="card">
+        <h3>Data Exports</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+            Download system-wide data for analysis or backup purposes.
+        </p>
+
+        <div class="export-section">
+            <button onclick="exportData('system')">Full System Export</button>
+            <button class="btn-success" onclick="exportData('moods')">Mood Logs</button>
+            <button class="btn-danger" onclick="exportData('stress')">Stress Logs</button>
+            <button class="btn-warning" onclick="exportData('users')">User List</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let trendsChart = null;
+    let breakdownChart = null;
+
+    function logout() {
+        document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.href = '/login';
+    }
+
+    // Load Stats
+    async function loadStats() {
+        try {
+            const response = await fetch('/api/admin/stats');
+            if (response.ok) {
+                const stats = await response.json();
+                document.getElementById('totalUsers').textContent = stats.userCount;
+                document.getElementById('totalPosts').textContent = stats.postCount;
+                document.getElementById('flaggedPosts').textContent = stats.flaggedCount;
+                document.getElementById('activeAlerts').textContent = stats.alertCount;
+            }
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+
+    // Load Trends
+    async function loadTrends() {
+        try {
+            const days = document.getElementById('timeRange').value;
+            const response = await fetch(`/api/admin/stats/trends?days=${days}`);
+
+            if (response.ok) {
+                const data = await response.json();
+                renderTrendsChart(data);
+                renderBreakdownChart(data);
+            }
+        } catch (error) {
+            console.error('Error loading trends:', error);
+        }
+    }
+
+    function renderTrendsChart(data) {
+        if (trendsChart) trendsChart.destroy();
+
+        const ctx = document.getElementById('trendsChart').getContext('2d');
+        trendsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: 'Logins',
+                        data: data.logins,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Posts',
+                        data: data.posts,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Journals',
+                        data: data.journals,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Moods',
+                        data: data.moods,
+                        borderColor: '#ec4899',
+                        backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#f8fafc',
+                            usePointStyle: true,
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                        padding: 12,
+                        titleColor: '#f8fafc',
+                        bodyColor: '#94a3b8'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderBreakdownChart(data) {
+        if (breakdownChart) breakdownChart.destroy();
+
+        const totals = {
+            logins: data.logins.reduce((a, b) => a + b, 0),
+            posts: data.posts.reduce((a, b) => a + b, 0),
+            journals: data.journals.reduce((a, b) => a + b, 0),
+            moods: data.moods.reduce((a, b) => a + b, 0),
+            goals: data.goals.reduce((a, b) => a + b, 0),
+            habits: data.habits.reduce((a, b) => a + b, 0),
+            stress: data.stress.reduce((a, b) => a + b, 0)
+        };
+
+        const ctx = document.getElementById('breakdownChart').getContext('2d');
+        breakdownChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Logins', 'Posts', 'Journals', 'Moods', 'Goals', 'Habits', 'Stress'],
+                datasets: [{
+                    label: 'Total Activities',
+                    data: [
+                        totals.logins,
+                        totals.posts,
+                        totals.journals,
+                        totals.moods,
+                        totals.goals,
+                        totals.habits,
+                        totals.stress
+                    ],
+                    backgroundColor: [
+                        'rgba(99, 102, 241, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(236, 72, 153, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(20, 184, 166, 0.8)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ],
+                    borderRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                        padding: 12
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Load Activity
+    async function loadActivity() {
+        try {
+            const response = await fetch('/api/admin/activity');
+
+            if (response.ok) {
+                const activities = await response.json();
+
+                if (activities.length === 0) {
+                    document.getElementById('activityList').innerHTML =
+                        '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No recent activity</div>';
+                    return;
+                }
+
+                document.getElementById('activityList').innerHTML = activities.map(a => `
+                    <div class="activity-item">
+                        <div class="activity-info">
+                            <div class="activity-user">${a.user ? a.user.username : 'System'}</div>
+                            <div class="activity-action">${formatAction(a.action)}</div>
+                        </div>
+                        <div class="activity-time">${formatTime(a.timestamp)}</div>
+                    </div>
+                `).join('');
+            }
+        } catch (error) {
+            console.error('Error loading activity:', error);
+            document.getElementById('activityList').innerHTML =
+                '<div style="text-align: center; padding: 2rem; color: var(--danger);">Failed to load activities</div>';
+        }
+    }
+
+    function formatAction(action) {
+        const actionMap = {
+            'LOGIN': 'Logged in',
+            'POST_CREATED': 'Created a post',
+            'JOURNAL_CREATED': 'Created journal entry',
+            'MOOD_LOGGED': 'Logged mood',
+            'GOAL_CREATED': 'Created goal',
+            'HABIT_CREATED': 'Created habit',
+            'STRESS_LOGGED': 'Logged stress'
+        };
+        return actionMap[action] || action;
+    }
+
+    function formatTime(timestamp) {
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+        return date.toLocaleDateString();
+    }
+
+    function exportData(type) {
+        window.location.href = `/api/admin/export/${type}`;
+    }
+
+    // Initialize
+    window.addEventListener('load', () => {
+        loadStats();
+        loadTrends();
+        loadActivity();
+
+        // Refresh activity every 30 seconds
+        setInterval(loadActivity, 30000);
+    });
+</script>
 
 </body>
 </html>
