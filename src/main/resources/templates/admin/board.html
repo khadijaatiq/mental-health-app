@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Admin - Board Moderation - MindTrack</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        .navbar {
+            background-color: var(--surface);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input, select {
+            padding: 0.5rem;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 0.5rem;
+            color: var(--text);
+        }
+
+        .post-card {
+            background-color: var(--surface);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        .flag-reason {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid var(--danger);
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="logo">MindTrack Admin</div>
+    <div class="nav-links">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/resources">Resources</a>
+        <a href="/admin/board">Board</a>
+        <a href="/admin/crisis">Crisis</a>
+        <a href="/admin/reports">Reports</a>
+        <a href="/admin/settings">Settings</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="filters">
+        <input type="text" id="searchUser" placeholder="Filter by username..." onkeyup="filterPosts()">
+        <select id="filterReason" onchange="filterPosts()">
+            <option value="">All Reasons</option>
+            <option value="Inappropriate">Inappropriate</option>
+            <option value="Spam">Spam</option>
+            <option value="Harassment">Harassment</option>
+        </select>
+    </div>
+
+    <div id="postList"></div>
+
+</div>
+
+<script>
+    function logout() {
+        document.cookie = "JWT=; expires=Thu, 01 Jan 1970; path=/;";
+        window.location.href = "/login";
+    }
+
+    function getJWT() {
+        return document.cookie
+            .split(";")
+            .map(c => c.trim().split("="))
+            .find(c => c[0] === "JWT")?.[1] || null;
+    }
+
+    let allPosts = [];
+
+    async function loadFlaggedPosts() {
+        try {
+            const jwt = getJWT();
+            if (!jwt) return;
+
+            const response = await fetch("/api/admin/posts/flagged", {
+                headers: { "Authorization": "Bearer " + jwt }
+            });
+
+            if (response.ok) {
+                allPosts = await response.json();
+                renderPosts(allPosts);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function renderPosts(posts) {
+        const list = document.getElementById("postList");
+
+        if (posts.length === 0) {
+            list.innerHTML = `<p style="color: var(--text-muted); text-align:center;">No flagged posts found.</p>`;
+            return;
+        }
+
+        list.innerHTML = posts.map(post => `
+            <div class="post-card">
+                <div class="post-header">
+                    <div>
+                        <strong>${post.user ? post.user.username : "Unknown"}</strong>
+                        ${post.anonymous ? `<span class="badge-warning">Anonymous (Revealed)</span>` : ""}
+                    </div>
+                    <span>${new Date(post.date).toLocaleDateString()}</span>
+                </div>
+
+                <div class="post-content">
+                    ${post.content}
+                    <div class="flag-reason"><strong>Flagged:</strong> ${post.flagReason || "No reason"}</div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn-success" onclick="resolvePost(${post.id})">Keep</button>
+                    <button class="btn-danger" onclick="deletePost(${post.id})">Delete</button>
+                    <button class="btn-warning" onclick="blockUser(${post.user?.id || 0})">Block User</button>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    function filterPosts() {
+        const query = document.getElementById("searchUser").value.toLowerCase();
+        const reason = document.getElementById("filterReason").value.toLowerCase();
+
+        const filtered = allPosts.filter(p =>
+            (p.user?.username || "").toLowerCase().includes(query) &&
+            (p.flagReason || "").toLowerCase().includes(reason)
+        );
+
+        renderPosts(filtered);
+    }
+
+    async function resolvePost(id) {
+        if (!confirm("Unflag this post?")) return;
+
+        const jwt = getJWT();
+        await fetch(`/api/admin/posts/${id}/resolve`, {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + jwt }
+        });
+
+        loadFlaggedPosts();
+    }
+
+    async function deletePost(id) {
+        if (!confirm("Delete this post permanently?")) return;
+
+        const jwt = getJWT();
+        await fetch(`/api/admin/posts/${id}`, {
+            method: "DELETE",
+            headers: { "Authorization": "Bearer " + jwt }
+        });
+
+        loadFlaggedPosts();
+    }
+
+    async function blockUser(userId) {
+        if (!userId || !confirm("Block this user?")) return;
+
+        const jwt = getJWT();
+        await fetch(`/api/admin/users/${userId}/block`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + jwt
+            },
+            body: JSON.stringify({ blocked: true })
+        });
+
+        alert("User blocked.");
+    }
+
+    loadFlaggedPosts();
+</script>
+
+</body>
+</html>

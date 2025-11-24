@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Dashboard - MindTrack</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --bg: #0f172a;
+        --surface: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+    }
+
+    body {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+    }
+
+    .navbar {
+        background-color: var(--surface);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: linear-gradient(to right, #818cf8, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links a {
+        color: var(--text-muted);
+        text-decoration: none;
+        margin-left: 1.5rem;
+    }
+
+    .container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: auto;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .card {
+        background-color: var(--surface);
+        padding: 1.5rem;
+        border-radius: 1rem;
+    }
+
+    .card h3 {
+        color: var(--primary);
+        margin-top: 0;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        background-color: var(--primary);
+        color: white;
+        border-radius: 0.5rem;
+        text-decoration: none;
+    }
+</style>
+</head>
+
+<body>
+<nav class="navbar">
+    <div class="logo">MindTrack Admin</div>
+    <div class="nav-links">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h2>Admin Dashboard</h2>
+
+    <div class="grid">
+
+        <div class="card">
+            <h3>Manage Resources</h3>
+            <p>Add/Edit/Delete resources.</p>
+            <a href="/admin/resources" class="btn">Open Resources</a>
+        </div>
+
+        <div class="card">
+            <h3>Moderate Support Board</h3>
+            <p>View reported posts.</p>
+            <a href="/admin/board" class="btn">Moderate Board</a>
+        </div>
+
+        <div class="card">
+            <h3>Crisis Alerts</h3>
+            <p>View high-risk users.</p>
+            <a href="/admin/crisis" class="btn">View Alerts</a>
+        </div>
+
+        <div class="card">
+            <h3>User Activity Reports</h3>
+            <p>Usage analytics.</p>
+            <a href="/admin/reports" class="btn">Open Reports</a>
+        </div>
+
+        <div class="card">
+            <h3>System Settings</h3>
+            <p>Configure thresholds & roles.</p>
+            <a href="/admin/settings" class="btn">Settings</a>
+        </div>
+        <div class="card">
+            <h3>User Management</h3>
+            <p>Manage users.</p>
+            <a href="/admin/users" class="btn">Users</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function logout() {
+        document.cookie = "JWT=; expires=Thu, 01 Jan 1970; path=/;";
+        window.location.href = '/login';
+    }
+</script>
+
+</body>
+</html>

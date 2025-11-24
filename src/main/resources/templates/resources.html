@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Mental Health Resources - MindTrack</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-light: #243349;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: var(--surface);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            margin-left: 1.5rem;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background-color: var(--surface);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .search-bar {
+            width: 50%;     /* takes half the container */
+            max-width: 500px;
+            padding: 8px 12px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        label {
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.55rem;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        /* Resource Grid */
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .resource-card {
+            background-color: var(--surface-light);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: 0.2s;
+        }
+
+        .resource-card:hover {
+            background-color: #2e4260;
+        }
+
+        .category-tag {
+            background-color: var(--primary-dark);
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.4rem;
+            font-size: 0.75rem;
+            display: inline-block;
+            margin-bottom: 0.8rem;
+        }
+
+        .resource-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .resource-description {
+            color: var(--text-muted);
+            margin-bottom: 1.2rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .resource-link {
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .resource-link:hover {
+            color: var(--primary-dark);
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="logo">MindTrack</div>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/resources" style="color: white;">Resources</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <!-- Header -->
+    <h2>Mental Health Resources</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+        Curated articles, guides, and tools to support your mental well-being.
+    </p>
+
+    <!-- Search + Filters -->
+    <div class="card">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+            <div>
+                <label>Search</label>
+                <input type="text" class="search-bar" placeholder="Search...">
+            </div>
+            <div>
+                <label>Category</label>
+                <select id="categoryFilter">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resources -->
+    <div id="resourceList" class="resource-grid"></div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        loadCategories();
+        loadResources();
+
+        document.getElementById("search").addEventListener("input", function (e) {
+            loadResources(e.target.value, document.getElementById("categoryFilter").value);
+        });
+
+        document.getElementById("categoryFilter").addEventListener("change", function (e) {
+            loadResources(document.getElementById("search").value, e.target.value);
+        });
+    });
+
+    async function loadCategories() {
+        try {
+            const res = await fetch('/api/resources/categories');
+            const categories = await res.json();
+            const filter = document.getElementById('categoryFilter');
+            filter.innerHTML = '<option value="">All Categories</option>';
+
+            categories.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c;
+                option.textContent = c;
+                filter.appendChild(option);
+            });
+        } catch (err) {
+            console.error('Failed to load categories', err);
+        }
+    }
+
+    function getUrl(keyword = '', category = '') {
+        if (keyword) return `/api/resources/search?keyword=${encodeURIComponent(keyword)}`;
+        if (category) return `/api/resources/category/${encodeURIComponent(category)}`;
+        return '/api/resources';
+    }
+
+    function loadResources(keyword = '', category = '') {
+        const url = getUrl(keyword, category);
+
+        fetch(url)
+            .then(resp => resp.json())
+            .then(data => {
+                const container = document.getElementById("resourceList");
+                container.innerHTML = "";
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted); grid-column: 1/-1; text-align:center; padding: 2rem;">No resources found.</p>';
+                    return;
+                }
+
+                data.forEach(resource => {
+                    const card = document.createElement("div");
+                    card.className = "resource-card";
+
+                    card.innerHTML = `
+                    <div class="category-tag">${resource.category ? resource.category.name : "General"}</div>
+                    <div class="resource-title">${resource.title}</div>
+                    <div class="resource-description">${resource.description || ""}</div>
+                    ${resource.link ? `<a href="${resource.link}" target="_blank" class="resource-link">Read More →</a>` : ""}
+                `;
+
+                    container.appendChild(card);
+                });
+            });
+    }
+
+    function logout() {
+        window.location.href = "/logout";
+    }
+</script>
+
+</body>
+</html>

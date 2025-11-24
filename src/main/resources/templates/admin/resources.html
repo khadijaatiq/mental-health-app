@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Admin - Manage Resources - MindTrack</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background-color: var(--surface);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        /* MAIN */
+        .container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        /* CARDS */
+        .card {
+            background-color: var(--surface);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        /* FORM */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            color: var(--text);
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        /* RESOURCE LIST */
+        .resource-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .resource-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .resource-info h4 {
+            margin: 0 0 0.5rem 0;
+        }
+
+        .resource-info p {
+            margin: 0 0 0.3rem 0;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        select {
+            background-color: #1e293b; /* solid surface color */
+            color: var(--text);
+        }
+
+        select option {
+            background-color: #1e293b;
+            color: var(--text);
+            padding: 8px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<!-- NAVIGATION -->
+<div class="navbar">
+    <div class="logo">MindTrack Admin</div>
+
+    <div class="nav-links">
+        <a href="/admin/board">Board</a>
+        <a href="/admin/users">Users</a>
+        <a href="/admin/reports">Reports</a>
+        <a href="/admin/settings">Settings</a>
+        <a href="/admin/resources" style="color: var(--primary); font-weight: 600;">Resources</a>
+        <a href="javascript:logout()">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="header">
+        <h2>Manage Resources</h2>
+        <div>
+            <button class="btn-warning" onclick="loadDefaults()">Load Default Resources</button>
+            <button class="btn-success" onclick="openCategoryManager()" style="margin-left:8px;">Manage Categories</button>
+        </div>
+    </div>
+
+    <!-- ADD / EDIT FORM -->
+    <div class="card">
+        <h3 id="formTitle">Add New Resource</h3>
+
+        <form id="resourceForm">
+            <input type="hidden" id="resourceId">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="categorySelect" required>
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Description</label>
+                    <textarea id="description" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>External Link</label>
+                    <input type="url" id="link">
+                </div>
+
+                <div class="form-group">
+                    <label>Upload File</label>
+                    <input type="file" id="file">
+                </div>
+            </div>
+
+            <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                <button type="submit" class="btn-primary">Save Resource</button>
+                <button type="button" onclick="resetForm()" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted);">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- RESOURCE LIST -->
+    <div class="resource-list" id="resourceList"></div>
+
+</div>
+
+<!-- Simple Category Manager modal (minimal) -->
+<div id="categoryModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center;">
+    <div style="background:var(--surface); padding:1.5rem; border-radius:8px; width:420px; border:1px solid rgba(255,255,255,0.06);">
+        <h3 style="color:var(--primary); margin-top:0;">Manage Categories</h3>
+        <div style="margin-bottom:0.75rem;">
+            <input id="newCategoryName" placeholder="New category name" style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid rgba(255,255,255,0.06); background:rgba(0,0,0,0.06); color:var(--text);">
+        </div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+            <button class="btn-primary" onclick="addCategory()">Add</button>
+            <button onclick="closeCategoryModal()" style="background:transparent; border:1px solid var(--text-muted); color:var(--text-muted);">Close</button>
+        </div>
+        <div style="margin-top:1rem;">
+            <div id="categoryListInModal"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function logout() {
+        document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.href = '/login';
+    }
+
+    async function loadCategories() {
+        const res = await fetch('/api/resources/categories');
+        const cats = await res.json();
+        const select = document.getElementById('categorySelect');
+        select.innerHTML = '<option value="">Select category</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+        // also populate modal list
+        const modalList = document.getElementById('categoryListInModal');
+        modalList.innerHTML = cats.map(c => `<div style="display:flex; justify-content:space-between; padding:6px 0;"><span style="color:var(--text)">${c}</span><button style="background:transparent; border:none; color:var(--danger); cursor:pointer;" onclick="deleteCategory('${c}')">Delete</button></div>`).join('');
+    }
+
+    async function openCategoryManager() {
+        document.getElementById('categoryModal').style.display = 'flex';
+        await loadCategories();
+    }
+
+    function closeCategoryModal() {
+        document.getElementById('categoryModal').style.display = 'none';
+    }
+
+    async function addCategory() {
+        const name = document.getElementById('newCategoryName').value.trim();
+        if (!name) return alert('Enter a category name');
+        // create by posting a resource category creation endpoint (we'll reuse categories endpoint that we add below).
+        // For simplicity, we'll hit POST /api/resources/categories
+        const res = await fetch('/api/resources/categories', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        });
+        if (res.ok) {
+            document.getElementById('newCategoryName').value = '';
+            await loadCategories();
+        } else {
+            alert('Could not add category');
+        }
+    }
+
+    async function deleteCategory(name) {
+        if (!confirm('Delete category "' + name + '"? If it has a resource attached it wont be deleted.')) return;
+        const res = await fetch(`/api/resources/categories/${encodeURIComponent(name)}`, { method: 'DELETE' });
+        if (res.ok) loadCategories();
+        else alert('Failed to delete category');
+    }
+
+    // Resources
+    async function loadResources() {
+        const res = await fetch('/api/resources');
+        const resources = await res.json();
+        const list = document.getElementById('resourceList');
+
+        list.innerHTML = resources
+            .map(r => `
+            <div class="resource-item">
+                <div class="resource-info">
+                    <h4>${r.title}
+                        <span style="font-size:0.75rem; background:rgba(99,102,241,0.2); color:#818cf8; padding:0.1rem 0.4rem; border-radius:4px; margin-left:0.5rem;">
+                            ${r.category ? r.category.name : 'General'}
+                        </span>
+                    </h4>
+
+                    <p>${r.description || "No description"}</p>
+
+                    ${r.link ? `<a href="${r.link}" target="_blank" style="color:var(--primary); font-size:0.875rem;">External Link</a>` : ""}
+                    ${r.fileUrl ? `<a href="/${r.fileUrl}" target="_blank" style="color:var(--success); font-size:0.875rem; margin-left:0.7rem;">Download File</a>` : ""}
+                </div>
+
+                <div class="actions">
+                    <button class="btn-primary" onclick='editResource(${JSON.stringify(r).replace(/'/g, "&#39;")})'>Edit</button>
+                    <button class="btn-danger" onclick="deleteResource(${r.id})">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function loadDefaults() {
+        if (!confirm("Load default resources? This may create duplicates.")) return;
+        await fetch('/api/resources/load-defaults', { method: 'POST' });
+        loadResources();
+        loadCategories();
+    }
+
+    async function deleteResource(id) {
+        if (!confirm("Delete this resource?")) return;
+        await fetch(`/api/resources/${id}`, { method: 'DELETE' });
+        loadResources();
+    }
+
+    function editResource(r) {
+        document.getElementById('formTitle').textContent = 'Edit Resource';
+        document.getElementById('resourceId').value = r.id;
+        document.getElementById('title').value = r.title;
+        document.getElementById('categorySelect').value = r.category ? r.category.name : '';
+        document.getElementById('description').value = r.description || '';
+        document.getElementById('link').value = r.link || '';
+        window.scrollTo(0, 0);
+    }
+
+    function resetForm() {
+        document.getElementById('resourceForm').reset();
+        document.getElementById('resourceId').value = '';
+        document.getElementById('formTitle').textContent = 'Add New Resource';
+    }
+
+    document.getElementById('resourceForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const id = document.getElementById('resourceId').value;
+        const fileInput = document.getElementById('file');
+        let fileUrl = null;
+
+        if (fileInput.files.length > 0) {
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            const res = await fetch('/api/resources/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (res.ok) fileUrl = await res.text();
+        }
+
+        const payload = {
+            title: document.getElementById('title').value,
+            description: document.getElementById('description').value,
+            category: document.getElementById('categorySelect').value,
+            link: document.getElementById('link').value,
+            fileUrl
+        };
+
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `/api/resources/${id}` : '/api/resources';
+
+        await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        resetForm();
+        loadResources();
+        loadCategories();
+    });
+
+    // Init
+    loadCategories();
+    loadResources();
+</script>
+
+</body>
+</html>

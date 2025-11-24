@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Dashboard - MindTrack</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        .navbar {
+            background-color: var(--surface);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, #4f46e5, #9333ea);
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-card h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+        }
+
+        .welcome-card p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--surface);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--surface);
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #334155;
+            background-color: var(--bg);
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            box-sizing: border-box;
+            min-height: 80px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.5rem;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-dark);
+        }
+    </style>
+</head>
+
+<body>
+<nav class="navbar">
+    <div class="logo">MindTrack</div>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/mood">Mood</a>
+        <a href="/journal">Journal</a>
+        <a href="/goals">Goals</a>
+        <a href="/checkin">Check-In</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="welcome-card">
+        <h2>Welcome Back!</h2>
+        <p>Track your mental well-being and stay on top of your goals.</p>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Mood Tracker</h3>
+            <p>Log your daily mood and track emotional patterns over time.</p>
+            <a href="/mood" class="btn">Log Mood</a>
+        </div>
+        <div class="card">
+            <h3>Journal</h3>
+            <p>Write down your thoughts and feelings in a private space.</p>
+            <a href="/journal" class="btn">Write Entry</a>
+        </div>
+        <div class="card">
+            <h3>Goals</h3>
+            <p>Set and track personal goals for your mental wellness journey.</p>
+            <a href="/goals" class="btn">View Goals</a>
+        </div>
+        <div class="card">
+            <h3>Habit Tracker</h3>
+            <p>Build positive habits and track your daily streaks.</p>
+            <a href="/habits" class="btn">Track Habits</a>
+        </div>
+        <div class="card">
+            <h3>Stress Monitor</h3>
+            <p>Log stress levels and identify triggers to manage them better.</p>
+            <a href="/stress" class="btn">Log Stress</a>
+        </div>
+        <div class="card">
+            <h3>Daily Check-In</h3>
+            <p>Take a moment to reflect with a quick 3-question self-assessment.</p>
+            <a href="/checkin" class="btn">Start Check-In</a>
+        </div>
+        <div class="card">
+            <h3>Support Board</h3>
+            <p>Share your experiences and connect with others anonymously.</p>
+            <a href="/board" class="btn">Visit Board</a>
+        </div>
+        <div class="card">
+            <h3>Resources</h3>
+            <p>Explore curated articles and videos for your mental well-being.</p>
+            <a href="/resources" class="btn">Browse Resources</a>
+        </div>
+        <div class="card">
+            <h3>Analytics</h3>
+            <p>Visualize your progress with detailed charts and insights.</p>
+            <a href="/analytics" class="btn">View Insights</a>
+        </div>
+        <div class="card">
+            <h3>Export Data</h3>
+            <p>Download your data as a PDF report or CSV file.</p>
+            <a href="/export" class="btn">Export Data</a>
+        </div>
+    </div>
+</div>
+
+<!-- Check-In Modal -->
+<div class="modal-overlay" id="checkinModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Daily Reflection</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div id="modalQuestionsContainer">
+            <!-- Questions will be loaded here -->
+        </div>
+        <button class="btn-submit" onclick="saveCheckIn()">Save Check-In</button>
+    </div>
+</div>
+
+<script>
+    let currentQuestions = [];
+
+    function logout() {
+        document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.href = '/login';
+    }
+
+    async function showCheckinModal() {
+        try {
+            // Check if user already completed check-in today
+            const response = await fetch('/api/checkins/today/status');
+            const data = await response.json();
+
+            if (!data.completed) {
+                // Only show modal if not completed
+                await loadModalQuestions();
+                document.getElementById('checkinModal').classList.add('active');
+            }
+        } catch (error) {
+            console.error('Error checking check-in status:', error);
+        }
+    }
+
+    async function loadModalQuestions() {
+        try {
+            const response = await fetch('/api/checkins/questions');
+            const data = await response.json();
+            currentQuestions = data.questions;
+
+            const container = document.getElementById('modalQuestionsContainer');
+            container.innerHTML = currentQuestions.map((question, index) => `
+                    <div class="form-group">
+                        <label>${question}</label>
+                        <textarea id="answer${index}" required></textarea>
+                    </div>
+                `).join('');
+        } catch (error) {
+            console.error('Error loading questions:', error);
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('checkinModal').classList.remove('active');
+    }
+
+    async function saveCheckIn() {
+        const answer1 = document.getElementById('answer0').value.trim();
+        const answer2 = document.getElementById('answer1').value.trim();
+        const answer3 = document.getElementById('answer2').value.trim();
+
+        if (!answer1 || !answer2 || !answer3) {
+            alert('Please answer all questions');
+            return;
+        }
+
+        const checkIn = {
+            date: new Date().toISOString().split('T')[0],
+            question1: currentQuestions[0],
+            answer1: answer1,
+            question2: currentQuestions[1],
+            answer2: answer2,
+            question3: currentQuestions[2],
+            answer3: answer3
+        };
+
+        try {
+            const response = await fetch('/api/checkins', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(checkIn)
+            });
+
+            if (response.ok) {
+                closeModal();
+                alert('Check-in saved! ✓');
+            } else {
+                alert('Failed to save check-in');
+            }
+        } catch (error) {
+            console.error('Error saving check-in:', error);
+            alert('An error occurred while saving');
+        }
+    }
+
+    // Show modal when page loads
+    window.addEventListener('load', showCheckinModal);
+</script>
+</body>
+
+</html>

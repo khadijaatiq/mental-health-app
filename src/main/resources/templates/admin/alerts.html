@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin - Alerts</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/admin-dashboard.css">
+</head>
+<body>
+<nav class="navbar">
+    <div class="logo">MindTrack Admin</div>
+    <div class="nav-links">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/resources">Resources</a>
+        <a href="/admin/board">Board</a>
+        <a href="/admin/crisis">Crisis</a>
+        <a href="/admin/reports">Reports</a>
+        <a href="/admin/settings">Settings</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h2>Crisis Alerts</h2>
+    <div class="list-container" id="alertsList">
+        <p style="color: var(--text-muted);">Loading alerts...</p>
+    </div>
+</div>
+
+<script>
+    function logout() {
+        document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.href = '/login';
+    }
+
+    // Read JWT from cookie
+    function getJWT() {
+        const cookies = document.cookie.split(';');
+        for (let c of cookies) {
+            const [name, value] = c.trim().split('=');
+            if (name === 'JWT') return value;
+        }
+        return null;
+    }
+
+    async function loadAlerts() {
+        try {
+            const jwt = getJWT();
+            if (!jwt) {
+                console.error("JWT not found!");
+                return;
+            }
+
+            const r = await fetch('/api/admin/alerts/recent', {
+                headers: {
+                    "Authorization": "Bearer " + jwt
+                }
+            });
+
+            if (r.ok) {
+                const alerts = await r.json();
+                document.getElementById('alertsList').innerHTML =
+                    alerts.map(a => `
+                        <div class="list-item">
+                            <div class="item-header">
+                                <span>${a.severity}</span>
+                                <span>${a.date}</span>
+                            </div>
+                            <div class="item-content">${a.reason}</div>
+                        </div>
+                    `).join('');
+            } else {
+                document.getElementById('alertsList').innerHTML =
+                    "<p style='color:red;'>Failed to load alerts (unauthorized)</p>";
+            }
+
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    loadAlerts();
+</script>
+
+</body>
+</html>
