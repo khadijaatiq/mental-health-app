@@ -18,8 +18,8 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     public AuthService(UserRepository userRepository,
-            PasswordEncoder encoder,
-            JwtUtil jwtUtil) {
+                       PasswordEncoder encoder,
+                       JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.jwtUtil = jwtUtil;
@@ -39,11 +39,15 @@ public class AuthService {
 
         // Assign roles
         Set<String> roles = new HashSet<>();
-        roles.add("ROLE_USER"); // Default role
 
         // Check for admin code
         if ("admin-secret".equals(adminCode)) {
+
             roles.add("ROLE_ADMIN");
+        }
+        else
+        {
+            roles.add("ROLE_USER");
         }
 
         user.setRoles(roles);
@@ -68,7 +72,6 @@ public class AuthService {
         return jwtUtil.generateToken(new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                user.getRoles().stream()
-                        .map(r -> new org.springframework.security.core.authority.SimpleGrantedAuthority(r)).toList()));
+                user.getRoles().stream().map(r -> new org.springframework.security.core.authority.SimpleGrantedAuthority(r)).toList()));
     }
 }

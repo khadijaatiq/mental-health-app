@@ -5,213 +5,62 @@
     <title>Goals - MindTrack</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-        }
-
-        .navbar {
-            background-color: var(--surface);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #818cf8, #c084fc);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .nav-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            margin-left: 1.5rem;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--text);
-        }
-
-        .container {
-            padding: 2rem;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background-color: var(--surface);
-            padding: 2rem;
-            border-radius: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 2rem;
-        }
-
-        h2 {
-            margin-top: 0;
-            color: var(--primary);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-muted);
-        }
-
-        input[type="text"],
-        input[type="date"],
-        textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border: 1px solid #334155;
-            background-color: #0f172a;
-            color: white;
-            font-size: 1rem;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-
-        button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            border: none;
-            background-color: var(--primary);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        button:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .goal-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .goal-item {
-            background-color: rgba(255, 255, 255, 0.03);
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .goal-content h3 {
-            margin: 0 0 0.5rem 0;
-            font-size: 1.1rem;
-        }
-
-        .goal-content p {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .goal-meta {
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .goal-actions button {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            background-color: rgba(99, 102, 241, 0.2);
-            color: #818cf8;
-        }
-
-        .goal-actions button:hover {
-            background-color: rgba(99, 102, 241, 0.3);
-        }
-
-        .completed {
-            opacity: 0.6;
-            text-decoration: line-through;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/users.css">
 </head>
 
 <body>
-    <nav class="navbar">
-        <div class="logo">MindTrack</div>
-        <div class="nav-links">
-            <a href="/dashboard">Dashboard</a>
-            <a href="/mood">Mood</a>
-            <a href="/journal">Journal</a>
-            <a href="/goals">Goals</a>
-            <a href="#" onclick="logout()">Logout</a>
-        </div>
-    </nav>
+<nav class="navbar">
+    <div class="logo">MindTrack</div>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/mood">Mood</a>
+        <a href="/journal">Journal</a>
+        <a href="/goals">Goals</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
 
-    <div class="container">
-        <div class="card">
-            <h2>Set New Goal</h2>
-            <form id="goalForm">
-                <div class="form-group">
-                    <label for="title">Goal Title</label>
-                    <input type="text" id="title" required placeholder="e.g., Meditate daily">
-                </div>
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" placeholder="Details about your goal..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="targetDate">Target Date</label>
-                    <input type="date" id="targetDate" required>
-                </div>
-                <button type="submit">Create Goal</button>
-            </form>
-        </div>
-
-        <div class="card">
-            <h2>My Goals</h2>
-            <ul id="goalList" class="goal-list">
-                <!-- Goals will be loaded here -->
-            </ul>
-        </div>
+<div class="container">
+    <div class="card">
+        <h2>Set New Goal</h2>
+        <form id="goalForm">
+            <div class="form-group">
+                <label for="title">Goal Title</label>
+                <input type="text" id="title" required placeholder="e.g., Meditate daily">
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" placeholder="Details about your goal..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="targetDate">Target Date</label>
+                <input type="date" id="targetDate" required>
+            </div>
+            <button type="submit">Create Goal</button>
+        </form>
     </div>
 
-    <script>
-        function logout() {
-            document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            window.location.href = '/login';
-        }
+    <div class="card">
+        <h2>My Goals</h2>
+        <ul id="goalList" class="goal-list">
+            <!-- Goals will be loaded here -->
+        </ul>
+    </div>
+</div>
 
-        async function loadGoals() {
-            try {
-                const response = await fetch('/api/goals');
-                if (response.ok) {
-                    const goals = await response.json();
-                    const list = document.getElementById('goalList');
-                    list.innerHTML = goals.map(goal => `
+<script>
+    function logout() {
+        document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.href = '/login';
+    }
+
+    async function loadGoals() {
+        try {
+            const response = await fetch('/api/goals');
+            if (response.ok) {
+                const goals = await response.json();
+                const list = document.getElementById('goalList');
+                list.innerHTML = goals.map(goal => `
                         <li class="goal-item ${goal.status === 'completed' ? 'completed' : ''}">
                             <div class="goal-content">
                                 <h3>${goal.title}</h3>
@@ -224,65 +73,65 @@
                             </div>
                         </li>
                     `).join('');
-                }
-            } catch (error) {
-                console.error('Error loading goals:', error);
             }
+        } catch (error) {
+            console.error('Error loading goals:', error);
         }
+    }
 
-        async function deleteGoal(id) {
-            if (!confirm('Are you sure you want to delete this goal?')) return;
-            try {
-                const response = await fetch(`/api/goals/${id}`, {
-                    method: 'DELETE'
-                });
-                if (response.ok) {
-                    loadGoals();
-                }
-            } catch (error) {
-                console.error('Error deleting goal:', error);
+    async function deleteGoal(id) {
+        if (!confirm('Are you sure you want to delete this goal?')) return;
+        try {
+            const response = await fetch(`/api/goals/${id}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                loadGoals();
             }
+        } catch (error) {
+            console.error('Error deleting goal:', error);
         }
+    }
 
-        async function markCompleted(id) {
-            try {
-                const response = await fetch(`/api/goals/${id}/complete`, {
-                    method: 'PATCH'
-                });
-                if (response.ok) {
-                    loadGoals();
-                }
-            } catch (error) {
-                console.error('Error updating goal:', error);
+    async function markCompleted(id) {
+        try {
+            const response = await fetch(`/api/goals/${id}/complete`, {
+                method: 'PATCH'
+            });
+            if (response.ok) {
+                loadGoals();
             }
+        } catch (error) {
+            console.error('Error updating goal:', error);
         }
+    }
 
-        document.getElementById('goalForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const title = document.getElementById('title').value;
-            const description = document.getElementById('description').value;
-            const targetDate = document.getElementById('targetDate').value;
+    document.getElementById('goalForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('title').value;
+        const description = document.getElementById('description').value;
+        const targetDate = document.getElementById('targetDate').value;
 
-            try {
-                const response = await fetch('/api/goals', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ title, description, targetDate, status: 'pending' })
-                });
+        try {
+            const response = await fetch('/api/goals', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title, description, targetDate, status: 'pending' })
+            });
 
-                if (response.ok) {
-                    loadGoals();
-                    e.target.reset();
-                }
-            } catch (error) {
-                console.error('Error saving goal:', error);
+            if (response.ok) {
+                loadGoals();
+                e.target.reset();
             }
-        });
+        } catch (error) {
+            console.error('Error saving goal:', error);
+        }
+    });
 
-        loadGoals();
-    </script>
+    loadGoals();
+</script>
 </body>
 
 </html>

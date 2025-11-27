@@ -4,6 +4,7 @@ import com.example.demo.model.Journal;
 import com.example.demo.model.User;
 import com.example.demo.repository.JournalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,9 +24,29 @@ public class JournalService {
         this.journalRepository = journalRepository;
     }
 
+    @Autowired
+    private CrisisAlertService crisisAlertService;
+
+    @Value("${app.crisis.keywords}")
+    private List<String> keywords;
+
     public Journal createJournal(Journal journal) {
-        return journalRepository.save(journal);
+        Journal saved = journalRepository.save(journal);
+
+        if (containsKeywords(saved.getEntryText())) {
+            crisisAlertService.createAlert(saved.getUser(), saved);
+        }
+
+        return saved;
     }
+
+    private boolean containsKeywords(String text) {
+        if (text == null) return false;
+
+        String lower = text.toLowerCase();
+        return keywords.stream().anyMatch(lower::contains);
+    }
+
 
     public List<Journal> getAllJournals() {
         return journalRepository.findAll();

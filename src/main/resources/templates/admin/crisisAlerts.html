@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crisis Alerts - Admin</title>
+    <link rel="stylesheet" href="/css/admin-dashboard.css">
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            color: var(--text); /* white-ish text */
+        }
+
+        th, td {
+            border: 1px solid #374151; /* darker border */
+            padding: 0.75rem 1rem;
+            vertical-align: top;
+            color: var(--text); /* keep text light */
+        }
+
+        th {
+            background: var(--surface); /* darker background for header */
+            color: var(--primary); /* bright header text */
+            font-weight: 600;
+        }
+        textarea {
+            width: 100%;
+            min-height: 3rem;
+        }
+        blockquote {
+            background: #273549; /* darker than surface */
+            border-left: 4px solid var(--primary);
+            padding: 0.5rem;
+            margin: 0;
+            white-space: pre-wrap;
+            color: var(--text);
+        }
+
+        .btn {
+            cursor: pointer;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.25rem;
+            border: none;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        .btn-danger { background: #dc3545; color: #fff; }
+        .btn-secondary { background: #6c757d; color: #fff; }
+
+        .message {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.3rem;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Crisis Alerts</h2>
+
+<!-- Flash message -->
+<div id="flash-message" class="message"></div>
+
+<table>
+    <thead>
+    <tr>
+        <th>User</th>
+        <th>Date</th>
+        <th>Journal Entry</th>
+        <th>Admin Note + Actions</th>
+    </tr>
+    </thead>
+    <tbody id="alerts-table">
+    <tr id="no-alerts-row" style="display:none;">
+        <td colspan="5" style="text-align:center; color:#777;">No crisis alerts to display.</td>
+    </tr>
+    </tbody>
+</table>
+
+
+<script>
+    // =========================
+    // Load Alerts From Backend
+    // =========================
+    async function loadAlerts() {
+        const res = await fetch("/admin/crisis/api/alerts", { credentials: "include" });
+        const alerts = await res.json();
+
+        console.log(alerts);
+        const table = document.getElementById("alerts-table");
+        const noRow = document.getElementById("no-alerts-row");
+
+        table.querySelectorAll("tr:not(#no-alerts-row)").forEach(tr => tr.remove());
+
+        if (alerts.length === 0) {
+            noRow.style.display = "";
+            return;}
+        noRow.style.display = "none";
+
+        alerts.forEach(alert => {
+            const row = document.createElement("tr");
+
+            if (alert.crisisConfirmed) {
+                row.innerHTML = `
+            <td>${alert.username}</td>
+            <td>${new Date(alert.createdAt).toLocaleString()}</td>
+            <td><blockquote>${alert.entryText}</blockquote></td>
+            <td><strong>Marked as Crisis</strong></td>
+        `;
+            } else {
+                row.innerHTML = `
+            <td>${alert.username}</td>
+            <td>${new Date(alert.createdAt).toLocaleString()}</td>
+            <td><blockquote>${alert.entryText}</blockquote></td>
+            <td>
+                <textarea class="admin-note" placeholder="Add admin note...">${alert.adminMessage ? alert.adminMessage : ''}</textarea>
+                <br>
+                <button class="btn btn-danger" onclick="confirmAlert(${alert.id}, this)">Mark as Crisis</button>
+                <br>
+                <button class="btn btn-secondary" onclick="resolveAlert(${alert.id}, this)">Resolve</button>
+            </td>
+        `;
+            }
+
+            table.appendChild(row);
+        });
+
+    }
+
+
+    // =========================
+    // Confirm Crisis (POST)
+    // =========================
+    async function confirmAlert(id, btn) {
+        const note = btn.parentElement.querySelector(".admin-note").value;
+
+        if (!note.trim()) {
+            showMessage("Admin note cannot be empty.", true);
+            return;
+        }
+
+        await fetch(`/admin/crisis/confirm/${id}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            credentials: "include",
+            body: new URLSearchParams({ adminMessage: note })
+        });
+
+        showMessage("Alert marked as crisis.");
+        loadAlerts(); // reload data to update UI
+    }
+
+    async function resolveAlert(id) {
+        await fetch(`/admin/crisis/resolve/${id}`, {
+            method: "POST",
+            credentials: "include"
+        });
+
+        showMessage("Alert resolved.");
+        loadAlerts(); // reload data to update UI
+    }
+
+    // =========================
+    // Flash Message Display
+    // =========================
+    function showMessage(text, isError = false) {
+        const msg = document.getElementById("flash-message");
+        msg.textContent = text;
+        msg.style.display = "block";
+
+        if (isError) msg.style.background = "#f8d7da";
+
+        setTimeout(() => msg.style.display = "none", 3000);
+    }
+
+    // Load alerts on page load
+    loadAlerts();
+</script>
+
+</body>
+</html>

@@ -81,13 +81,12 @@ public class PostController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Post> update(@PathVariable Long id, @RequestBody PostDTO postDTO,
-            @AuthenticationPrincipal User user) {
+                                       @AuthenticationPrincipal User user) {
         Post post = postService.getPost(id);
         if (post != null && post.getUser().getId().equals(user.getId())) {
             post.setContent(postDTO.getContent());
             post.setAnonymous(postDTO.isAnonymous());
             Post updated = postService.updatePost(post);
-            userActivityService.logActivity(user, "POST_UPDATED", "Updated post ID: " + id);
             return ResponseEntity.ok(updated);
         }
         return ResponseEntity.notFound().build();
@@ -98,7 +97,6 @@ public class PostController {
         Post post = postService.getPost(id);
         if (post != null && post.getUser().getId().equals(user.getId())) {
             postService.deletePost(id);
-            userActivityService.logActivity(user, "POST_DELETED", "Deleted post ID: " + id);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
@@ -106,7 +104,7 @@ public class PostController {
 
     @PostMapping("/{id}/flag")
     public ResponseEntity<Void> flagPost(@PathVariable Long id, @RequestBody Map<String, String> body,
-            @AuthenticationPrincipal User user) {
+                                         @AuthenticationPrincipal User user) {
         Post post = postService.getPost(id);
         if (post != null) {
             post.setFlagged(true);

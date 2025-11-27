@@ -48,7 +48,7 @@ public class MoodController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Mood> update(@PathVariable Long id, @RequestBody MoodDTO moodDTO,
-            @AuthenticationPrincipal User user) {
+                                       @AuthenticationPrincipal User user) {
         Mood mood = moodService.getMood(id);
         if (mood != null && mood.getUser().getId().equals(user.getId())) {
             mood.setMoodLevel(moodDTO.getMoodLevel());

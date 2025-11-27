@@ -23,7 +23,7 @@ public interface MoodRepository extends JpaRepository<Mood, Long> {
 
     @Query("SELECT AVG(m.intensity) FROM Mood m WHERE m.user = :user AND m.date BETWEEN :start AND :end")
     Double getAverageIntensity(@Param("user") User user, @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end);
+                               @Param("end") LocalDateTime end);
 
     @Query("SELECT m.moodLevel, COUNT(m) FROM Mood m WHERE m.user = :user GROUP BY m.moodLevel")
     List<Object[]> countMoodsByUser(@Param("user") User user);

@@ -34,61 +34,61 @@
 
 <script>
   function logout() {
-      document.cookie = "JWT=; expires=Thu, 01 Jan 1970; path=/;";
-      window.location.href = "/login";
+    document.cookie = "JWT=; expires=Thu, 01 Jan 1970; path=/;";
+    window.location.href = "/login";
   }
 
   function getJwt() {
-      return document.cookie.split("; ")
-          .find(r => r.startsWith("JWT="))
-          ?.split("=")[1];
+    return document.cookie.split("; ")
+            .find(r => r.startsWith("JWT="))
+            ?.split("=")[1];
   }
 
   async function loadMoods() {
-      const jwt = getJwt();
+    const jwt = getJwt();
 
-      const res = await fetch("/api/admin/moods", {
-          headers: { "Authorization": "Bearer " + jwt }
-      });
+    const res = await fetch("/api/admin/moods", {
+      headers: { "Authorization": "Bearer " + jwt }
+    });
 
-      const list = await res.json();
-      const ul = document.getElementById("moodList");
-      ul.innerHTML = "";
+    const list = await res.json();
+    const ul = document.getElementById("moodList");
+    ul.innerHTML = "";
 
-      list.forEach(m => {
-          ul.innerHTML += `
+    list.forEach(m => {
+      ul.innerHTML += `
               <li class="list-item">
                   ${m.name}
                   <button class="btn-danger" onclick="deleteMood(${m.id})">Delete</button>
               </li>
           `;
-      });
+    });
   }
 
   async function addMood() {
-      const name = document.getElementById("newMood").value.trim();
-      if (!name) return alert("Enter a mood name");
+    const name = document.getElementById("newMood").value.trim();
+    if (!name) return alert("Enter a mood name");
 
-      await fetch("/api/admin/moods", {
-          method: "POST",
-          headers: {
-              "Authorization": "Bearer " + getJwt(),
-              "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ name })
-      });
+    await fetch("/api/admin/moods", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + getJwt(),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name })
+    });
 
-      document.getElementById("newMood").value = "";
-      loadMoods();
+    document.getElementById("newMood").value = "";
+    loadMoods();
   }
 
   async function deleteMood(id) {
-      await fetch(`/api/admin/moods/${id}`, {
-          method: "DELETE",
-          headers: { "Authorization": "Bearer " + getJwt() }
-      });
+    await fetch(`/api/admin/moods/${id}`, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + getJwt() }
+    });
 
-      loadMoods();
+    loadMoods();
   }
 
   loadMoods();

@@ -1,9 +1,11 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.JournalDTO;
+import com.example.demo.model.CrisisAlert;
 import com.example.demo.model.EmotionTag;
 import com.example.demo.model.Journal;
 import com.example.demo.model.User;
+import com.example.demo.service.CrisisAlertService;
 import com.example.demo.service.EmotionTagService;
 import com.example.demo.service.JournalService;
 import com.example.demo.service.UserActivityService;
@@ -14,19 +16,21 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.*;
 
 @RestController
 @RequestMapping("/api/journals")
 public class JournalController {
-
+    private final CrisisAlertService crisisAlertService;
     private final JournalService journalService;
     private final EmotionTagService emotionTagService;
 
     private final UserActivityService userActivityService;
 
-    public JournalController(JournalService journalService, EmotionTagService emotionTagService, UserActivityService userActivityService) {
+    public JournalController(CrisisAlertService crisisAlertService, JournalService journalService, EmotionTagService emotionTagService, UserActivityService userActivityService) {
+        this.crisisAlertService = crisisAlertService;
         this.journalService = journalService;
         this.emotionTagService = emotionTagService;
         this.userActivityService = userActivityService;
@@ -80,7 +84,7 @@ public class JournalController {
 
     @GetMapping("/date")
     public ResponseEntity<List<Journal>> getJournalByDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                                                    @AuthenticationPrincipal User user) {
+                                                          @AuthenticationPrincipal User user) {
 
         System.out.println("Received getJournalByDate request for date: " + date + ", user: " + user.getUsername());
         List<Journal> journals = journalService.getJournalsByUserAndDate(user, date);
@@ -105,10 +109,21 @@ public class JournalController {
         }
         return ResponseEntity.notFound().build();
     }
+    @GetMapping("/messages")
+    public ResponseEntity<String> getAdminMessage(@AuthenticationPrincipal User user) {
+        Optional<CrisisAlert> alert =
+                crisisAlertService.getAlertsForUser(user).stream()
+                        .filter(a -> a.isReviewed() && a.isCrisisConfirmed() && a.getAdminMessage() != null)
+                        .findFirst();
+
+        return ResponseEntity.ok(
+                alert.map(CrisisAlert::getAdminMessage).orElse("")
+        );
+    }
 
     @PutMapping("/{id}")
     public ResponseEntity<Journal> update(@PathVariable Long id, @RequestBody JournalDTO journalDTO,
-            @AuthenticationPrincipal User user) {
+                                          @AuthenticationPrincipal User user) {
         Journal journal = journalService.getJournalById(id);
         if (journal != null && journal.getUser().getId().equals(user.getId())) {
             journal.setEntryText(journalDTO.getEntryText());

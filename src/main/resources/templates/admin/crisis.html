@@ -4,112 +4,7 @@
     <title>Admin - Crisis Management - MindTrack</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <style>
-        :root {
-            --primary: #6366f1;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-        }
-
-        .navbar {
-            background-color: var(--surface);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #818cf8, #c084fc);
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .nav-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            margin-left: 1.5rem;
-        }
-        .nav-links a:hover { color: var(--text); }
-
-        .container {
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .alert-list {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .alert-card {
-            background-color: var(--surface);
-            padding: 1.5rem;
-            border-radius: 1rem;
-            border: 1px solid rgba(255,255,255,0.05);
-            border-left: 4px solid var(--danger);
-        }
-
-        .alert-card.resolved {
-            border-left-color: var(--success);
-            opacity: 0.7;
-        }
-
-        .alert-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-
-        .severity-badge {
-            background: rgba(239,68,68,0.2);
-            color: var(--danger);
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .actions {
-            display: flex;
-            gap: .5rem;
-        }
-
-        button {
-            padding: .5rem 1rem;
-            border-radius: .5rem;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-outline { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); }
-    </style>
+    <link rel="stylesheet" href="/css/admin-dashboard.css">
 </head>
 
 <body>
@@ -201,13 +96,13 @@
 
                 <div class="actions">
                     ${
-                        alert.resolved
-                            ? `<span style="color:var(--success);">Resolved</span>`
-                            : `
+            alert.resolved
+                ? `<span style="color:var(--success);">Resolved</span>`
+                : `
                                 <button class="btn-success" onclick="acknowledgeAlert(${alert.id})">Acknowledge & Close</button>
                                 <button class="btn-primary" onclick="triggerFollowUp(${alert.user ? alert.user.id : 0})">Trigger Follow-up</button>
                             `
-                    }
+        }
                 </div>
             </div>
         `).join("");

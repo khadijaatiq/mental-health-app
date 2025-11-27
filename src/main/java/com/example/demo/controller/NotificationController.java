@@ -22,7 +22,7 @@ public class NotificationController {
 
     @PostMapping
     public ResponseEntity<Notification> create(@RequestBody Map<String, Object> body,
-            @AuthenticationPrincipal User user) {
+                                               @AuthenticationPrincipal User user) {
         String message = (String) body.get("message");
         String type = (String) body.get("type");
         String scheduledTimeStr = (String) body.get("scheduledTime");

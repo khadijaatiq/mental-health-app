@@ -157,6 +157,13 @@ public class ResourceController {
         return categoryService.getAll().stream().map(ResourceCategory::getName).toList();
     }
 
+    @GetMapping("/filter")
+    public List<Resource> filterCombined(
+            @RequestParam String keyword,
+            @RequestParam String category) {
+        return resourceService.searchWithCategory(keyword, category);
+    }
+
     // Delete category by name (Admin)
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/categories/{name}")

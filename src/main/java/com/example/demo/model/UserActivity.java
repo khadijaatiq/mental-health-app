@@ -20,8 +20,8 @@ public class UserActivity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private String action;
-    private String details;
+    private String action; // e.g., "LOGIN", "POST_CREATED"
+    private String details; // Optional details
     private LocalDateTime timestamp;
 
     @PrePersist

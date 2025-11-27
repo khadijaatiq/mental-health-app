@@ -21,7 +21,7 @@ public class CrisisDetectionService {
 
     @Autowired
     public CrisisDetectionService(MoodService moodService, StressService stressService,
-            JournalService journalService, AlertRepository alertRepository) {
+                                  JournalService journalService, AlertRepository alertRepository) {
         this.moodService = moodService;
         this.stressService = stressService;
         this.journalService = journalService;

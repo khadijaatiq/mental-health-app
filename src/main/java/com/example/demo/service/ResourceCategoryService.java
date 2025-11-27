@@ -3,7 +3,6 @@ package com.example.demo.service;
 import com.example.demo.model.ResourceCategory;
 import com.example.demo.repository.ResourceCategoryRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -32,23 +31,13 @@ public class ResourceCategoryService {
     public ResourceCategory findByName(String name) {
         return repository.findByNameIgnoreCase(name).orElse(null);
     }
-    @Transactional
     public void deleteByName(String name) {
-        ResourceCategory cat = repository.findByNameIgnoreCase(name)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-
-        // Check if any resources use this category
-        if (!cat.getResources().isEmpty()) {
-            throw new RuntimeException("Cannot delete category - resources are using it");
-        }
-
-        repository.delete(cat);
+        repository.deleteByNameIgnoreCase(name);
     }
 
     public void deleteById(Long id) {
         repository.deleteById(id);
     }
-
 
     public boolean exists(String name) {
         return repository.existsByNameIgnoreCase(name);
