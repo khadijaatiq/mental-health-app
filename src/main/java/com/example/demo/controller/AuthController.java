@@ -62,6 +62,7 @@ public class AuthController {
 
             boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
 
+            userActivityService.logActivity(user, "LOGIN", "User logged in");
             // Set JWT cookie (IMPORTANT)
             Cookie cookie = new Cookie("JWT", token);
             cookie.setHttpOnly(true);

@@ -1,3 +1,5 @@
+package com.example.demo.controller;
+
 import com.example.demo.model.Alert;
 import com.example.demo.service.AlertService;
 import org.springframework.http.ResponseEntity;

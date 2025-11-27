@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Your Alerts</title>
+    <link rel="stylesheet" th:href="@{/css/users.css}">
+</head>
+<body>
+<h2>Your Alerts</h2>
+
+<table>
+    <tr>
+        <th>Message</th>
+        <th>Admin Message</th>
+        <th>Status</th>
+        <th>Date</th>
+    </tr>
+
+    <tr th:each="alert : ${alerts}">
+        <td th:text="${alert.message}"></td>
+        <td th:text="${alert.adminMessage != null ? alert.adminMessage : '---'}"></td>
+
+        <td>
+            <span th:if="${alert.crisisConfirmed}">Crisis Confirmed ⚠️</span>
+            <span th:if="${!alert.crisisConfirmed and alert.reviewed}">Reviewed ✅</span>
+            <span th:if="${!alert.reviewed}">Pending ⏳</span>
+        </td>
+
+        <td th:text="${alert.createdAt}"></td>
+    </tr>
+</table>
+
+</body>
+</html>

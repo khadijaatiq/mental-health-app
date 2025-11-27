@@ -11,8 +11,11 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByUser(User user);
     List<Post> findByFlagged(boolean flagged);
+    List<Post> findByFlaggedTrue();
     List<Post> findByAnonymous(boolean anonymous);
     List<Post> findAllByOrderByCreatedAtDesc();
     List<Post> findByUserOrderByCreatedAtDesc(User user);
     List<Post> findByCreatedAtAfter(LocalDateTime date);
+    List<Post> findByUserAndCreatedAtAfterOrderByCreatedAtDesc(User user, LocalDateTime date);
+   // List<Post> findByUserOrderByCreatedAtDesc(User user, LocalDateTime createdAt);
 }

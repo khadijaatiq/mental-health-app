@@ -4,73 +4,7 @@
     <meta charset="UTF-8" />
     <title>Mood Tracker - MindTrack</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-        :root{
-          --primary:#6366f1;
-          --primary-700:#4f46e5;
-          --bg:#0f172a;
-          --surface:#1e293b;
-          --text:#f8fafc;
-          --muted:#94a3b8;
-          --card-border: rgba(255,255,255,0.05);
-          --chip-bg: rgba(99,102,241,0.12);
-        }
-
-        /* Base / Navbar - consistent with app */
-        html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-        body{background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
-        .navbar{background:var(--surface);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06)}
-        .logo{font-weight:700;background:linear-gradient(to right,#818cf8,#c084fc);-webkit-background-clip:text;color:transparent;font-size:1.25rem}
-        .nav-links a{color:var(--muted);text-decoration:none;margin-left:1rem;font-size:0.95rem}
-        .nav-links a:hover{color:var(--text)}
-
-        /* Page container & cards (match admin pages) */
-        .container{max-width:900px;margin:1.75rem auto;padding:0 1rem}
-        .card{background:var(--surface);border:1px solid var(--card-border);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem}
-        h1,h2{margin:0 0 0.75rem 0;color:var(--primary)}
-        .grid{display:grid;grid-template-columns:1fr 360px;gap:1rem}
-        @media (max-width:920px){ .grid{grid-template-columns:1fr} }
-
-        /* Mood input area */
-        .mood-buttons{display:flex;gap:0.5rem;flex-wrap:wrap}
-        .mood-btn{
-          display:inline-flex;align-items:center;gap:0.5rem;padding:0.55rem 0.9rem;border-radius:10px;
-          background:transparent;border:1px solid rgba(255,255,255,0.04);cursor:pointer;color:var(--text);
-          transition:transform .08s ease, box-shadow .08s ease;
-        }
-        .mood-btn:hover{transform:translateY(-3px)}
-        .mood-btn.selected{box-shadow:0 6px 18px rgba(99,102,241,0.12);border-color:rgba(99,102,241,0.28);background:var(--chip-bg)}
-
-        /* intensity + date */
-        .row{display:flex;gap:0.75rem;align-items:center}
-        .col{flex:1}
-        input[type="range"]{width:100%}
-        input[type="date"]{
-          background:transparent;border:1px solid rgba(255,255,255,0.04);padding:0.55rem;border-radius:8px;color:var(--text)
-        }
-
-        /* save button */
-        .save-btn{background:var(--primary);border:none;color:white;padding:0.65rem 0.9rem;border-radius:8px;font-weight:600;cursor:pointer}
-        .save-btn:hover{background:var(--primary-700)}
-
-        /* Recent moods list */
-        .mood-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.6rem}
-        .mood-item{display:flex;justify-content:space-between;align-items:center;padding:0.75rem;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
-        .mood-left{display:flex;align-items:center;gap:0.75rem}
-        .emoji{font-size:1.6rem}
-        .mood-meta{display:flex;flex-direction:column}
-        .mood-label{font-weight:700;color:var(--text)}
-        .mood-sub{font-size:0.85rem;color:var(--muted)}
-        .intensity-chip{padding:0.25rem 0.45rem;border-radius:6px;background:rgba(255,255,255,0.03);font-weight:600;color:var(--muted);font-size:0.85rem}
-
-        /* small utilities */
-        .muted{color:var(--muted);font-size:0.9rem}
-        .tiny{font-size:0.82rem}
-        .center{text-align:center}
-
-        /* subtle footer link for uploaded zip (internal developer helper) */
-        .dev-link{display:block;margin-top:0.6rem;color:var(--muted);font-size:0.8rem;text-decoration:underline;opacity:0.85}
-    </style>
+    <link rel="stylesheet" href="/css/users.css">
 </head>
 <body>
 <nav class="navbar">
@@ -141,8 +75,6 @@
         </div>
     </div>
 
-    <!-- subtle developer link: path to uploaded file (internal) -->
-    <a class="dev-link" href="/mnt/data/main.zip">(internal) uploaded project zip</a>
 </div>
 
 <script>

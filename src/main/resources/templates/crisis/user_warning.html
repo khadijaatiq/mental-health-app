@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Crisis Check</title>
+</head>
+<body>
+<h1>Check Result</h1>
+<p>Risk score: <span th:text="${score}">0</span></p>
+<p th:text="${message}">message</p>
+
+<form th:action="@{/crisis/request-help}" method="post">
+  <input type="hidden" name="userId" th:value="${param.userId}"/>
+  <button type="submit">Request Help</button>
+</form>
+
+<a th:href="@{/}">Home</a>
+</body>
+</html>

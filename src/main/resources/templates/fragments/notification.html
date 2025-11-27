@@ -1,0 +1,12 @@
+th="http://www.thymeleaf.org"
+<!-- Place this fragment and include it in pages where you want user notifications to appear -->
+<div th:fragment="notificationBanner" xmlns:th="http://www.w3.org/1999/xhtml">
+    <div id="userNotificationBanner" class="card" style="display:none; margin-bottom:1rem;">
+        <div class="header">
+            <strong>Message from admin</strong>
+        </div>
+        <div id="userNotificationMessage" style="color:var(--text);"></div>
+    </div>
+
+    <script th:src="@{/js/user-notifications.js}"></script>
+</div>

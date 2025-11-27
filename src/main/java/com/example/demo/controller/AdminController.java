@@ -7,20 +7,20 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-
-@RestController
+@Controller
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
     private final PostService postService;
-    private final AlertService alertService;
-    private final CrisisDetectionService crisisDetectionService;
+    private final CrisisAlertService crisisAlertService;
     private final UserService userService;
     private final UserRepository userRepository;
     private final UserActivityService userActivityService;
@@ -31,19 +31,17 @@ public class AdminController {
     private final HabitRepository habitRepository;
     private final StressRepository stressRepository;
 
-    public AdminController(PostService postService, AlertService alertService,
-            CrisisDetectionService crisisDetectionService,
-            UserService userService, UserRepository userRepository,
-            UserActivityService userActivityService,
-            CheckInService checkInService,
-            MoodRepository moodRepository,
-            JournalRepository journalRepository,
-            GoalRepository goalRepository,
-            HabitRepository habitRepository,
-            StressRepository stressRepository) {
+    public AdminController(PostService postService, CrisisAlertService crisisAlertService,
+                           UserService userService, UserRepository userRepository,
+                           UserActivityService userActivityService,
+                           CheckInService checkInService,
+                           MoodRepository moodRepository,
+                           JournalRepository journalRepository,
+                           GoalRepository goalRepository,
+                           HabitRepository habitRepository,
+                           StressRepository stressRepository) {
         this.postService = postService;
-        this.alertService = alertService;
-        this.crisisDetectionService = crisisDetectionService;
+        this.crisisAlertService = crisisAlertService;
         this.userService = userService;
         this.userRepository = userRepository;
         this.userActivityService = userActivityService;
@@ -61,13 +59,11 @@ public class AdminController {
         List<Post> allPosts = postService.getAllPosts();
         long postCount = allPosts.size();
         long flaggedCount = allPosts.stream().filter(Post::isFlagged).count();
-        long alertCount = alertService.getAllAlerts().size();
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("userCount", userCount);
         stats.put("postCount", postCount);
         stats.put("flaggedCount", flaggedCount);
-        stats.put("alertCount", alertCount);
 
         return ResponseEntity.ok(stats);
     }
@@ -139,6 +135,10 @@ public class AdminController {
         }
         return ResponseEntity.notFound().build();
     }
+    @GetMapping("/posts")
+    public ResponseEntity<List<Post>> getAllPostsAdmin() {
+        return ResponseEntity.ok(postService.getAllPosts());
+    }
 
     @PostMapping("/posts/{id}/resolve")
     public ResponseEntity<Void> resolveFlag(@PathVariable Long id) {
@@ -151,44 +151,27 @@ public class AdminController {
         }
         return ResponseEntity.notFound().build();
     }
-
     @DeleteMapping("/posts/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        postService.deletePost(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> deletePost(
+            @PathVariable Long id,
+            @RequestParam String reason
+    ) {
+        Post post = postService.getPost(id);
+        if (post != null) {
+            crisisAlertService.createPostDeletionAlert(post.getUser(), reason);
+            postService.deletePost(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 
-    // Alert Management
-    @GetMapping("/alerts")
-    public ResponseEntity<List<Alert>> getAllAlerts() {
-        List<Alert> alerts = alertService.getAllAlerts();
-        return ResponseEntity.ok(alerts);
-    }
 
-    @GetMapping("/alerts/high-risk")
-    public ResponseEntity<List<Alert>> getHighRiskAlerts() {
-        List<Alert> alerts = crisisDetectionService.getHighRiskAlerts();
-        return ResponseEntity.ok(alerts);
-    }
-
-    @GetMapping("/alerts/recent")
-    public ResponseEntity<List<Alert>> getRecentAlerts(@RequestParam(defaultValue = "7") int days) {
-        LocalDateTime since = LocalDateTime.now().minusDays(days);
-        List<Alert> alerts = alertService.getRecentAlerts(since);
-        return ResponseEntity.ok(alerts);
-    }
-
-    @GetMapping("/alerts/severity/{severity}")
-    public ResponseEntity<List<Alert>> getAlertsBySeverity(@PathVariable String severity) {
-        List<Alert> alerts = alertService.getAlertsBySeverity(severity);
-        return ResponseEntity.ok(alerts);
-    }
 
     @PostMapping("/crisis-check/{userId}")
     public ResponseEntity<Map<String, String>> runCrisisCheck(@PathVariable Long userId) {
         User user = userService.findById(userId).orElse(null);
         if (user != null) {
-            crisisDetectionService.analyzeUserRisk(user);
+            crisisAlertService.analyzeUserRisk(user);
             return ResponseEntity.ok(Map.of("message", "Crisis check completed for user " + userId));
         }
         return ResponseEntity.notFound().build();
@@ -306,6 +289,7 @@ public class AdminController {
         return "\"" + data.replace("\"", "\"\"") + "\"";
     }
 
+
     // Database Backup (Mock)
     @GetMapping("/backup")
     public ResponseEntity<Map<String, String>> triggerBackup() {
@@ -339,5 +323,19 @@ public class AdminController {
         habitRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/board")
+    public String boardPage(Model model) {
+        model.addAttribute("posts", postService.getAllPosts());
+        return "admin/board";
+    }
+
+
+    @GetMapping("/flagged")
+    public String flaggedPage() {
+        return "admin/flagged"; // loads templates/admin/flagged.html
+    }
 
 }
+
+
+

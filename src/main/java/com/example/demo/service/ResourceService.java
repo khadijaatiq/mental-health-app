@@ -57,24 +57,17 @@ public class ResourceService {
         existing.setFileUrl(req.getFileUrl());
         return repository.save(existing);
     }
-    public Resource updateResource(Long id, Resource resource) {
-        Resource existing = getResource(id);
-        if (resource.getTitle() != null) existing.setTitle(resource.getTitle());
-        existing.setDescription(resource.getDescription());
-        if (resource.getCategory() != null) {
-            existing.setCategory(categoryService.getOrCreate(resource.getCategory().getName()));
-        }
-        existing.setLink(resource.getLink());
-        existing.setFileUrl(resource.getFileUrl());
-        return repository.save(existing);
-    }
+
 
     public void deleteResource(Long id) {
         repository.deleteById(id);
     }
 
     public List<Resource> searchResources(String keyword) {
-        return repository.findByTitleContainingIgnoreCase(keyword);
+        return repository.smartSearch(keyword);
+    }
+    public List<Resource> searchWithCategory(String keyword, String category) {
+        return repository.findByTitleContainingIgnoreCaseAndCategory_NameIgnoreCase(keyword, category);
     }
 
     public List<Resource> filterByCategory(String categoryName) {

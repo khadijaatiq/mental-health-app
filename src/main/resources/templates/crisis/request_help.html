@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>Request Help</title></head>
+<body>
+<h1>Help Request</h1>
+<div th:if="${alert != null}">
+    <p>Alert created with score: <span th:text="${alert.riskScore}">0</span></p>
+    <p>Severity: <span th:text="${alert.severity}">HIGH</span></p>
+    <p>Reason: <span th:text="${alert.reason}">reason</span></p>
+</div>
+<div th:if="${alert == null}">
+    <p th:text="${message}">No alert</p>
+</div>
+<a th:href="@{/}">Home</a>
+</body>
+</html>

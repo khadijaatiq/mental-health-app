@@ -27,4 +27,6 @@ public interface MoodRepository extends JpaRepository<Mood, Long> {
 
     @Query("SELECT m.moodLevel, COUNT(m) FROM Mood m WHERE m.user = :user GROUP BY m.moodLevel")
     List<Object[]> countMoodsByUser(@Param("user") User user);
+
+    List<Mood> findByUserAndCreatedAtAfterOrderByCreatedAtDesc(User user, LocalDateTime createdAt);
 }

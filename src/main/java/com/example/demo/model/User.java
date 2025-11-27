@@ -37,7 +37,8 @@ public class User {
     private Set<String> roles;
     @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Alert> alerts;
+    private List<CrisisAlert> crisisAlerts;
+
 
     @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

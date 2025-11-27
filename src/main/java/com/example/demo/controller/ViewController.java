@@ -126,15 +126,11 @@ public class ViewController {
         return "admin/resources";
     }
 
-    @GetMapping("/admin/board")
-    public String adminBoard() {
-        return "admin/board";
-    }
-
-    @GetMapping("/admin/crisis")
-    public String adminCrisis() {
-        return "admin/crisis";
-    }
+//
+//    @GetMapping("/admin/crisis")
+//    public String adminCrisis() {
+//        return "admin/crisis";
+//    }
 
     @GetMapping("/admin/reports")
     public String adminReports() {
