@@ -118,69 +118,73 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1>Create Account</h1>
-        <div id="errorMessage" class="error">Registration failed</div>
-        <form id="registerForm">
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <div class="form-group">
-                <label for="adminCode">Admin Code (Optional)</label>
-                <input type="text" id="adminCode" name="adminCode" placeholder="Enter code for admin access">
-            </div>
-            <button type="submit">Sign Up</button>
-        </form>
-        <div class="footer">
-            Already have an account? <a href="/login">Sign in</a>
+<div class="container">
+    <h1>Create Account</h1>
+    <div id="errorMessage" class="error">Registration failed</div>
+    <form id="registerForm">
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" required>
         </div>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required minlength="8">
+        </div>
+        <div class="form-group">
+            <label for="adminCode">Admin Code (Optional)</label>
+            <input type="text" id="adminCode" name="adminCode" placeholder="Enter code for admin access">
+        </div>
+        <button type="submit">Sign Up</button>
+    </form>
+    <div class="footer">
+        Already have an account? <a href="/login">Sign in</a>
     </div>
+</div>
 
-    <script>
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('name').value;
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const adminCode = document.getElementById('adminCode').value;
-            const errorDiv = document.getElementById('errorMessage');
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('name').value;
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const adminCode = document.getElementById('adminCode').value;
+        const errorDiv = document.getElementById('errorMessage');
+        if (password.length < 8) {
+            errorDiv.textContent = "Password must be at least 8 characters long.";
+            errorDiv.style.display = 'block';
+            return;
+        }
+        try {
+            const response = await fetch('/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, username, email, password, adminCode })
+            });
 
-            try {
-                const response = await fetch('/auth/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ name, username, email, password, adminCode })
-                });
-
-                if (response.ok) {
-                    window.location.href = '/login';
-                } else {
-                    const data = await response.json();
-                    errorDiv.textContent = data.error || 'Registration failed';
-                    errorDiv.style.display = 'block';
-                }
-            } catch (error) {
-                errorDiv.textContent = 'An error occurred';
+            if (response.ok) {
+                window.location.href = '/login';
+            } else {
+                const data = await response.json();
+                errorDiv.textContent = data.error || 'Registration failed';
                 errorDiv.style.display = 'block';
             }
-        });
-    </script>
+        } catch (error) {
+            errorDiv.textContent = 'An error occurred';
+            errorDiv.style.display = 'block';
+        }
+    });
+</script>
 </body>
 
 </html>

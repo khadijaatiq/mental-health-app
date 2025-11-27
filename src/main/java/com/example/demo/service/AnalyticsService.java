@@ -17,7 +17,7 @@ public class AnalyticsService {
 
     @Autowired
     public AnalyticsService(MoodService moodService, JournalService journalService,
-            StressService stressService, GoalService goalService) {
+                            StressService stressService, GoalService goalService) {
         this.moodService = moodService;
         this.journalService = journalService;
         this.stressService = stressService;

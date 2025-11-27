@@ -28,53 +28,53 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                 http
-                                .csrf(csrf -> csrf.disable())
-                                .authorizeHttpRequests(auth -> auth
-                                                // Public pages
-                                                .requestMatchers(
-                                                                "/",
-                                                                "/auth/**",
-                                                                "/api/auth/**",
-                                                                "/login",
-                                                                "/register",
-                                                                "/error/**",
-                                                                "/css/**",
-                                                                "/js/**",
-                                                                "/images/**",
-                                                                "/uploads/**")
-                                                .permitAll()
+                        .csrf(csrf -> csrf.disable())
+                        .authorizeHttpRequests(auth -> auth
+                                // Public pages
+                                .requestMatchers(
+                                        "/",
+                                        "/auth/**",
+                                        "/api/auth/**",
+                                        "/login",
+                                        "/register",
+                                        "/error/**",
+                                        "/css/**",
+                                        "/js/**",
+                                        "/images/**",
+                                        "/uploads/**")
+                                .permitAll()
 
-                                                // USER dashboard & APIs
-                                                .requestMatchers(
-                                                                "/dashboard",
-                                                                "/api/moods/**",
-                                                                "/api/journals/**",
-                                                                "/api/habits/**",
-                                                                "/api/stress/**",
-                                                                "/api/posts/**",
-                                                                "/api/notifications/**",
-                                                                "/api/goals/**",
-                                                                "/api/export/**",
-                                                                "/api/checkins/**",
-                                                                "/resources/**")
-                                                .hasRole("USER")
+                                // USER dashboard & APIs
+                                .requestMatchers(
+                                        "/dashboard",
+                                        "/api/moods/**",
+                                        "/api/journals/**",
+                                        "/api/habits/**",
+                                        "/api/stress/**",
+                                        "/api/posts/**",
+                                        "/api/notifications/**",
+                                        "/api/goals/**",
+                                        "/api/export/**",
+                                        "/api/checkins/**",
+                                        "/resources/**")
+                                .hasRole("USER")
 
-                                                // ADMIN pages
-                                                .requestMatchers("/admin/**").hasRole("ADMIN")
-                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                // ADMIN pages
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                                                // Everything else requires authentication
-                                                .anyRequest().authenticated())
-                                .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                                // Everything else requires authentication
+                                .anyRequest().authenticated())
+                        .sessionManagement(session -> session
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();
         }
 
         @Bean
         public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
-                        throws Exception {
+                throws Exception {
                 return authenticationConfiguration.getAuthenticationManager();
         }
         @Bean

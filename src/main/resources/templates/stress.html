@@ -74,16 +74,16 @@
                 const stressList = await response.json();
                 const list = document.getElementById('stressList');
                 list.innerHTML = stressList.map(stress => `
-                    <li class="stress-item">
-                        <div class="stress-info">
-                            <span class="stress-badge ${getStressClass(stress.stressLevel)}">Level: ${stress.stressLevel}</span>
-                            <p style="margin: 0.5rem 0 0 0">${stress.notes || ''}</p>
-                        </div>
-                        <div class="stress-meta">
-                            <span>${stress.date}</span>
-                        </div>
-                    </li>
-                `).join('');
+                        <li class="stress-item">
+                            <div class="stress-info">
+                                <span class="stress-badge ${getStressClass(stress.stressLevel)}">Level: ${stress.stressLevel}</span>
+                                <p style="margin: 0.5rem 0 0 0">${stress.notes || ''}</p>
+                            </div>
+                            <div class="stress-meta">
+                                <span>${stress.date}</span>
+                            </div>
+                        </li>
+                    `).join('');
             }
         } catch (error) {
             console.error('Error loading stress logs:', error);

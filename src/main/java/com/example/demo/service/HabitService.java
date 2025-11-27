@@ -43,43 +43,22 @@ public class HabitService {
         if (habit == null) return null;
 
         LocalDate last = habit.getLastCompletedDate();
-        String freq = habit.getFrequency(); // DAILY / WEEKLY
+        LocalDate today = date;
 
-        if (freq.equals("DAILY")) {
-            // Already completed today
-            if (last != null && last.equals(date)) {
-                return habit;
-            }
-
-            // Streak logic
-            if (last != null && last.equals(date.minusDays(1))) {
-                habit.setStreak(habit.getStreak() + 1);
-            } else {
-                habit.setStreak(1);
-            }
-
-            habit.setLastCompletedDate(date);
+        if (last == null) {
+            habit.setStreak(1);
+        } else if (last.equals(today)) {
+            // already completed today → do nothing
+            return habit;
+        } else if (last.equals(today.minusDays(1))) {
+            habit.setStreak(habit.getStreak() + 1); // consecutive day
+        } else {
+            habit.setStreak(1); // reset streak
         }
 
-        else if (freq.equals("WEEKLY")) {
-            // Already checked in within the last 7 days
-            if (last != null && !last.plusDays(7).isBefore(date)) {
-                return habit;
-            }
-
-            // Streak logic — completed last week?
-            if (last != null && !last.plusDays(14).isBefore(date)) {
-                habit.setStreak(habit.getStreak() + 1);
-            } else {
-                habit.setStreak(1);
-            }
-
-            habit.setLastCompletedDate(date);
-        }
-
+        habit.setLastCompletedDate(today);
         return habitRepository.save(habit);
     }
-
 
 
     public int calculateStreak(User user, String habitName) {

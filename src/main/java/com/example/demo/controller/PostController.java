@@ -81,7 +81,7 @@ public class PostController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Post> update(@PathVariable Long id, @RequestBody PostDTO postDTO,
-            @AuthenticationPrincipal User user) {
+                                       @AuthenticationPrincipal User user) {
         Post post = postService.getPost(id);
         if (post != null && post.getUser().getId().equals(user.getId())) {
             post.setContent(postDTO.getContent());
@@ -104,7 +104,7 @@ public class PostController {
 
     @PostMapping("/{id}/flag")
     public ResponseEntity<Void> flagPost(@PathVariable Long id, @RequestBody Map<String, String> body,
-            @AuthenticationPrincipal User user) {
+                                         @AuthenticationPrincipal User user) {
         Post post = postService.getPost(id);
         if (post != null) {
             post.setFlagged(true);

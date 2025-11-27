@@ -84,7 +84,7 @@ public class JournalController {
 
     @GetMapping("/date")
     public ResponseEntity<List<Journal>> getJournalByDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                                                    @AuthenticationPrincipal User user) {
+                                                          @AuthenticationPrincipal User user) {
 
         System.out.println("Received getJournalByDate request for date: " + date + ", user: " + user.getUsername());
         List<Journal> journals = journalService.getJournalsByUserAndDate(user, date);
@@ -123,7 +123,7 @@ public class JournalController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Journal> update(@PathVariable Long id, @RequestBody JournalDTO journalDTO,
-            @AuthenticationPrincipal User user) {
+                                          @AuthenticationPrincipal User user) {
         Journal journal = journalService.getJournalById(id);
         if (journal != null && journal.getUser().getId().equals(user.getId())) {
             journal.setEntryText(journalDTO.getEntryText());

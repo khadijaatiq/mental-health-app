@@ -1,5 +1,7 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,18 +17,20 @@ public class CrisisAlert {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Journal journal;
-
     private boolean reviewed = false;
     private boolean crisisConfirmed = false;
 
     private String adminMessage;
-    private String message;  // general alert text
-    private String severity; // INFO, WARNING, CRISIS
+    private String message;
+    private String severity;
     private boolean resolved = false;
     private LocalDateTime timestamp;
     private LocalDateTime createdAt;

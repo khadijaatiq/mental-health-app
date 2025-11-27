@@ -88,7 +88,7 @@
     // =========================
     // Load Alerts From Backend
     // =========================
-        async function loadAlerts() {
+    async function loadAlerts() {
         const res = await fetch("/admin/crisis/api/alerts", { credentials: "include" });
         const alerts = await res.json();
 
@@ -99,22 +99,22 @@
         table.querySelectorAll("tr:not(#no-alerts-row)").forEach(tr => tr.remove());
 
         if (alerts.length === 0) {
-        noRow.style.display = "";
-        return;}
+            noRow.style.display = "";
+            return;}
         noRow.style.display = "none";
 
-            alerts.forEach(alert => {
-                const row = document.createElement("tr");
+        alerts.forEach(alert => {
+            const row = document.createElement("tr");
 
-                if (alert.crisisConfirmed) {
-                    row.innerHTML = `
+            if (alert.crisisConfirmed) {
+                row.innerHTML = `
             <td>${alert.username}</td>
             <td>${new Date(alert.createdAt).toLocaleString()}</td>
             <td><blockquote>${alert.entryText}</blockquote></td>
             <td><strong>Marked as Crisis</strong></td>
         `;
-                } else {
-                    row.innerHTML = `
+            } else {
+                row.innerHTML = `
             <td>${alert.username}</td>
             <td>${new Date(alert.createdAt).toLocaleString()}</td>
             <td><blockquote>${alert.entryText}</blockquote></td>
@@ -126,15 +126,15 @@
                 <button class="btn btn-secondary" onclick="resolveAlert(${alert.id}, this)">Resolve</button>
             </td>
         `;
-                }
+            }
 
-                table.appendChild(row);
-            });
+            table.appendChild(row);
+        });
 
-        }
+    }
 
 
-// =========================
+    // =========================
     // Confirm Crisis (POST)
     // =========================
     async function confirmAlert(id, btn) {
@@ -145,7 +145,7 @@
             return;
         }
 
-        await fetch(/admin/crisis/confirm/${id}, {
+        await fetch(`/admin/crisis/confirm/${id}`, {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             credentials: "include",
@@ -157,7 +157,7 @@
     }
 
     async function resolveAlert(id) {
-        await fetch(/admin/crisis/resolve/${id}, {
+        await fetch(`/admin/crisis/resolve/${id}`, {
             method: "POST",
             credentials: "include"
         });

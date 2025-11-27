@@ -66,7 +66,6 @@ public class UserActivityService {
             int dayIndex = days - 1 - (int) java.time.temporal.ChronoUnit.DAYS.between(date, today);
 
             if (dayIndex >= 0 && dayIndex < days) {
-                // Map actions to categories
                 if (action.equals("LOGIN")) {
                     activityCounts.get("logins").set(dayIndex, count.intValue());
                 } else if (action.startsWith("POST_")) {

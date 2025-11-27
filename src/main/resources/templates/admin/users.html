@@ -30,10 +30,8 @@
         <table>
             <thead>
             <tr>
-                <th>ID</th>
                 <th>Username</th>
                 <th>Email</th>
-                <th>Roles</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
@@ -56,14 +54,13 @@
         });
 
         const users = await res.json();
+        const filteredUsers = users.filter(u => u.roles && u.roles.includes("ROLE_USER"));
         const tbody = document.getElementById("usersTable");
 
-        tbody.innerHTML = users.map(u => `
+        tbody.innerHTML = filteredUsers.map(u => `
             <tr>
-                <td>${u.id}</td>
                 <td>${u.username}</td>
                 <td>${u.email}</td>
-                <td>${u.roles?.join(", ")}</td>
                 <td>
                     <span class="badge ${u.blocked ? 'badge-danger' : 'badge-success'}">
                         ${u.blocked ? "Blocked" : "Active"}

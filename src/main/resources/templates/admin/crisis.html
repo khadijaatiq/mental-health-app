@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin - Crisis Management - MindTrack</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/admin-dashboard.css">
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="logo">MindTrack Admin</div>
+    <div class="nav-links">
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/resources">Resources</a>
+        <a href="/admin/board">Board</a>
+        <a href="/admin/crisis">Crisis</a>
+        <a href="/admin/reports">Reports</a>
+        <a href="/admin/settings">Settings</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="header">
+        <h2>Crisis Alerts</h2>
+        <button class="btn-outline" onclick="loadAlerts()">Refresh</button>
+    </div>
+
+    <div class="alert-list" id="alertList"></div>
+
+</div>
+
+<script>
+
+    function logout() {
+        document.cookie = "JWT=; expires=Thu, 01 Jan 1970; path=/;";
+        window.location.href = "/login";
+    }
+
+    function getJWT() {
+        return document.cookie
+            .split(';')
+            .map(c => c.trim().split('='))
+            .find(p => p[0] === "JWT")?.[1] || null;
+    }
+
+    async function loadAlerts() {
+        try {
+            const jwt = getJWT();
+
+            const res = await fetch("/api/admin/alerts", {
+                headers: { "Authorization": "Bearer " + jwt }
+            });
+
+            if (res.ok) {
+                const alerts = await res.json();
+                renderAlerts(alerts);
+            }
+        } catch (e) {
+            console.error("Error loading alerts:", e);
+        }
+    }
+
+    function renderAlerts(alerts) {
+        const list = document.getElementById("alertList");
+
+        if (!alerts.length) {
+            list.innerHTML = `<p style="color:var(--text-muted); text-align:center;">No active alerts.</p>`;
+            return;
+        }
+
+        alerts.sort((a, b) => {
+            if (a.resolved === b.resolved)
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            return a.resolved ? 1 : -1;
+        });
+
+        list.innerHTML = alerts.map(alert => `
+            <div class="alert-card ${alert.resolved ? "resolved" : ""}">
+                <div class="alert-header">
+                    <div>
+                        <span class="severity-badge">${alert.severity}</span>
+                        <strong style="margin-left: .5rem;">
+                            ${alert.user ? alert.user.username : "Unknown"}
+                        </strong>
+                    </div>
+                    <span style="color:var(--text-muted); font-size:.875rem;">
+                        ${new Date(alert.createdAt).toLocaleString()}
+                    </span>
+                </div>
+
+                <div class="alert-content">${alert.reason}</div>
+
+                <div class="actions">
+                    ${
+            alert.resolved
+                ? `<span style="color:var(--success);">Resolved</span>`
+                : `
+                                <button class="btn-success" onclick="acknowledgeAlert(${alert.id})">Acknowledge & Close</button>
+                                <button class="btn-primary" onclick="triggerFollowUp(${alert.user ? alert.user.id : 0})">Trigger Follow-up</button>
+                            `
+        }
+                </div>
+            </div>
+        `).join("");
+    }
+
+    async function acknowledgeAlert(id) {
+
+        if (!confirm("Mark this alert as resolved?")) return;
+
+        const jwt = getJWT();
+
+        await fetch(`/api/admin/alerts/${id}/acknowledge`, {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + jwt }
+        });
+
+        loadAlerts();
+    }
+
+    async function triggerFollowUp(userId) {
+        if (!userId) return;
+
+        const msg = prompt("Enter follow-up message:");
+
+        if (!msg) return;
+
+        const jwt = getJWT();
+
+        await fetch("/api/admin/notifications/crisis", {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + jwt,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                userId,
+                message: msg
+            })
+        });
+
+        alert("Follow-up sent.");
+    }
+
+    loadAlerts();
+
+</script>
+
+</body>
+</html>

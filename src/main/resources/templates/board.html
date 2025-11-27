@@ -68,14 +68,14 @@
                 const posts = await response.json();
                 const list = document.getElementById('postList');
                 list.innerHTML = posts.map(post => `
-                    <li class="post-item">
-                        <div class="post-header">
-                            <span class="author">${post.username || 'Anonymous'}</span>
-                            <span>${formatToDDMMYYYY(post.date)}</span>
-                        </div>
-                        <div class="post-content">${post.content}</div>
-                    </li>
-                `).join('');
+                        <li class="post-item">
+                            <div class="post-header">
+                                <span class="author">${post.username || 'Anonymous'}</span>
+                                <span>${formatToDDMMYYYY(post.date)}</span>
+                            </div>
+                            <div class="post-content">${post.content}</div>
+                        </li>
+                    `).join('');
             }
         } catch (error) {
             console.error('Error loading posts:', error);

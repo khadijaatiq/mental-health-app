@@ -80,22 +80,22 @@
 <script>
     // Emoji mapping - friendly & compact (matches user's requested set)
     const MOODS = [
-      { key: 'HAPPY', emoji: '😊', label: 'Happy', color: '#f6e05e' },
-      { key: 'ANXIOUS', emoji: '😟', label: 'Anxious', color: '#f97316' },
-      { key: 'SAD', emoji: '😢', label: 'Sad', color: '#60a5fa' },
-      { key: 'NEUTRAL', emoji: '😐', label: 'Neutral', color: '#94a3b8' },
-      { key: 'STRESSED', emoji: '😫', label: 'Stressed', color: '#ef4444' },
-      { key: 'EXCITED', emoji: '🤩', label: 'Excited', color: '#10b981' }
+        { key: 'HAPPY', emoji: '😊', label: 'Happy', color: '#f6e05e' },
+        { key: 'ANXIOUS', emoji: '😟', label: 'Anxious', color: '#f97316' },
+        { key: 'SAD', emoji: '😢', label: 'Sad', color: '#60a5fa' },
+        { key: 'NEUTRAL', emoji: '😐', label: 'Neutral', color: '#94a3b8' },
+        { key: 'STRESSED', emoji: '😫', label: 'Stressed', color: '#ef4444' },
+        { key: 'EXCITED', emoji: '🤩', label: 'Excited', color: '#10b981' }
     ];
 
     // Helpers for auth cookie (app uses JWT cookie in other pages)
     function getJwt() {
-      return document.cookie.split('; ').find(r => r.startsWith('JWT='))?.split('=')[1] || null;
+        return document.cookie.split('; ').find(r => r.startsWith('JWT='))?.split('=')[1] || null;
     }
 
     function logout(){
-      document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      window.location.href = '/login';
+        document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.href = '/login';
     }
 
     // DOM refs
@@ -115,59 +115,59 @@
 
     // Render mood buttons
     function renderMoodButtons() {
-      moodButtonsContainer.innerHTML = '';
-      MOODS.forEach(m => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'mood-btn' + (m.key === selectedMood ? ' selected' : '');
-        btn.innerHTML = `<span class="emoji">${m.emoji}</span><span class="tiny">${m.label}</span>`;
-        btn.addEventListener('click', () => {
-          selectedMood = m.key;
-          updateSelectedUI();
+        moodButtonsContainer.innerHTML = '';
+        MOODS.forEach(m => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'mood-btn' + (m.key === selectedMood ? ' selected' : '');
+            btn.innerHTML = `<span class="emoji">${m.emoji}</span><span class="tiny">${m.label}</span>`;
+            btn.addEventListener('click', () => {
+                selectedMood = m.key;
+                updateSelectedUI();
+            });
+            moodButtonsContainer.appendChild(btn);
         });
-        moodButtonsContainer.appendChild(btn);
-      });
     }
 
     function updateSelectedUI(){
-      // update classes
-      Array.from(moodButtonsContainer.children).forEach((el, idx) => {
-        el.classList.toggle('selected', MOODS[idx].key === selectedMood);
-      });
+        // update classes
+        Array.from(moodButtonsContainer.children).forEach((el, idx) => {
+            el.classList.toggle('selected', MOODS[idx].key === selectedMood);
+        });
     }
 
     // Initialize inputs
     function initInputs(){
-      intensityInput.addEventListener('input', () => {
-        intensityValue.textContent = intensityInput.value;
-      });
+        intensityInput.addEventListener('input', () => {
+            intensityValue.textContent = intensityInput.value;
+        });
 
-      // default date to today
-      const today = new Date();
-      moodDate.valueAsDate = today;
+        // default date to today
+        const today = new Date();
+        moodDate.valueAsDate = today;
     }
 
     // Format ISO -> friendly local date/time
     function fmtDate(iso) {
-      const d = new Date(iso);
-      if (isNaN(d)) return iso;
-      // e.g. "Nov 23, 2025 — 14:30"
-      const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-      const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-      return `${date} • ${time}`;
+        const d = new Date(iso);
+        if (isNaN(d)) return iso;
+        // e.g. "Nov 23, 2025 — 14:30"
+        const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        return `${date} • ${time}`;
     }
 
     // Render a single mood entry in the list
     function renderMoodItem(m) {
-      // m expected shape: { id, moodLevel, intensity, date }
-      const moodDef = MOODS.find(x => x.key === m.moodLevel) || { emoji: '🙂', label: m.moodLevel || 'Mood' };
-      const li = document.createElement('li');
-      li.className = 'mood-item';
-      li.dataset.id = m.id ?? '';
+        // m expected shape: { id, moodLevel, intensity, date }
+        const moodDef = MOODS.find(x => x.key === m.moodLevel) || { emoji: '🙂', label: m.moodLevel || 'Mood' };
+        const li = document.createElement('li');
+        li.className = 'mood-item';
+        li.dataset.id = m.id ?? '';
 
-      const left = document.createElement('div');
-      left.className = 'mood-left';
-      left.innerHTML = `
+        const left = document.createElement('div');
+        left.className = 'mood-left';
+        left.innerHTML = `
         <div class="emoji" aria-hidden="true">${moodDef.emoji}</div>
         <div class="mood-meta">
           <div class="mood-label">${moodDef.label}</div>
@@ -175,119 +175,119 @@
         </div>
       `;
 
-      const right = document.createElement('div');
-      right.style.display = 'flex';
-      right.style.flexDirection = 'column';
-      right.style.alignItems = 'flex-end';
-      right.innerHTML = `
+        const right = document.createElement('div');
+        right.style.display = 'flex';
+        right.style.flexDirection = 'column';
+        right.style.alignItems = 'flex-end';
+        right.innerHTML = `
         <div class="intensity-chip">Intensity: ${m.intensity ?? '-'}</div>
       `;
 
-      li.appendChild(left);
-      li.appendChild(right);
+        li.appendChild(left);
+        li.appendChild(right);
 
-      return li;
+        return li;
     }
 
     // Load moods (paged)
     async function loadMoods(reset = true) {
-      if (reset) {
-        page = 0;
-        moodListEl.innerHTML = '';
-      }
-      const offset = page * PAGE_SIZE;
-      const url = `/api/moods?offset=${offset}&limit=${PAGE_SIZE}`;
-      try {
-        const headers = {};
-        const jwt = getJwt();
-        if (jwt) headers['Authorization'] = 'Bearer ' + jwt;
+        if (reset) {
+            page = 0;
+            moodListEl.innerHTML = '';
+        }
+        const offset = page * PAGE_SIZE;
+        const url = `/api/moods?offset=${offset}&limit=${PAGE_SIZE}`;
+        try {
+            const headers = {};
+            const jwt = getJwt();
+            if (jwt) headers['Authorization'] = 'Bearer ' + jwt;
 
-        const res = await fetch(url, { headers });
-        if (!res.ok) {
-          // fallback: try without paging (some backends may not support offset/limit)
-          if (reset) {
-            const fallback = await fetch('/api/moods', { headers });
-            if (fallback.ok) {
-              const data = await fallback.json();
-              renderMoodsArray(data.slice(0, PAGE_SIZE));
-              page = 0;
-              return;
+            const res = await fetch(url, { headers });
+            if (!res.ok) {
+                // fallback: try without paging (some backends may not support offset/limit)
+                if (reset) {
+                    const fallback = await fetch('/api/moods', { headers });
+                    if (fallback.ok) {
+                        const data = await fallback.json();
+                        renderMoodsArray(data.slice(0, PAGE_SIZE));
+                        page = 0;
+                        return;
+                    }
+                }
+                console.warn('Could not load moods', res.status);
+                return;
             }
-          }
-          console.warn('Could not load moods', res.status);
-          return;
+            const data = await res.json();
+            if (!Array.isArray(data)) return;
+            renderMoodsArray(data);
+            if (data.length < PAGE_SIZE) {
+                loadMoreBtn.style.display = 'none';
+            } else {
+                loadMoreBtn.style.display = 'inline-flex';
+            }
+        } catch (err) {
+            console.error('Error loading moods', err);
         }
-        const data = await res.json();
-        if (!Array.isArray(data)) return;
-        renderMoodsArray(data);
-        if (data.length < PAGE_SIZE) {
-          loadMoreBtn.style.display = 'none';
-        } else {
-          loadMoreBtn.style.display = 'inline-flex';
-        }
-      } catch (err) {
-        console.error('Error loading moods', err);
-      }
     }
 
     function renderMoodsArray(arr) {
-      // assume arr is ordered newest-first; if not, sort by date
-      const sorted = arr.slice().sort((a,b) => new Date(b.date) - new Date(a.date));
-      sorted.forEach(m => {
-        moodListEl.appendChild(renderMoodItem(m));
-      });
-      page++;
+        // assume arr is ordered newest-first; if not, sort by date
+        const sorted = arr.slice().sort((a,b) => new Date(b.date) - new Date(a.date));
+        sorted.forEach(m => {
+            moodListEl.appendChild(renderMoodItem(m));
+        });
+        page++;
     }
 
     // Save a mood
     async function saveMood() {
-      saveStatus.textContent = '';
-      const moodLevel = selectedMood;
-      const intensity = parseInt(intensityInput.value || '5', 10);
-      const dateOnly = moodDate.value; // yyyy-mm-dd
-      if (!dateOnly) {
-        saveStatus.textContent = 'Please choose a date';
-        return;
-      }
-      // append current time (keeps behavior similar to previous)
-      const now = new Date();
-      const timeString = now.toTimeString().split(' ')[0];
-      const dateTime = `${dateOnly}T${timeString}`;
-
-      const payload = { moodLevel, intensity, date: dateTime };
-
-      try {
-        const headers = { 'Content-Type': 'application/json' };
-        const jwt = getJwt();
-        if (jwt) headers['Authorization'] = 'Bearer ' + jwt;
-
-        const res = await fetch('/api/moods', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(payload)
-        });
-
-        if (res.ok) {
-          saveStatus.textContent = 'Saved ✓';
-          // pre-pend the new item visually (prefer local optimistic update)
-          const created = await res.json().catch(() => ({ moodLevel, intensity, date: dateTime }));
-          // put newly created item at top
-          const li = renderMoodItem(created);
-          moodListEl.insertBefore(li, moodListEl.firstChild);
-          // reset to defaults
-          intensityInput.value = 5; intensityValue.textContent = '5';
-          moodDate.valueAsDate = new Date();
-          // briefly show status then clear
-          setTimeout(()=> saveStatus.textContent = '', 2200);
-        } else {
-          const body = await res.text().catch(()=>null);
-          saveStatus.textContent = 'Save failed';
-          console.error('Save failed', res.status, body);
+        saveStatus.textContent = '';
+        const moodLevel = selectedMood;
+        const intensity = parseInt(intensityInput.value || '5', 10);
+        const dateOnly = moodDate.value; // yyyy-mm-dd
+        if (!dateOnly) {
+            saveStatus.textContent = 'Please choose a date';
+            return;
         }
-      } catch (err) {
-        saveStatus.textContent = 'Error';
-        console.error('Error saving mood', err);
-      }
+        // append current time (keeps behavior similar to previous)
+        const now = new Date();
+        const timeString = now.toTimeString().split(' ')[0];
+        const dateTime = `${dateOnly}T${timeString}`;
+
+        const payload = { moodLevel, intensity, date: dateTime };
+
+        try {
+            const headers = { 'Content-Type': 'application/json' };
+            const jwt = getJwt();
+            if (jwt) headers['Authorization'] = 'Bearer ' + jwt;
+
+            const res = await fetch('/api/moods', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                saveStatus.textContent = 'Saved ✓';
+                // pre-pend the new item visually (prefer local optimistic update)
+                const created = await res.json().catch(() => ({ moodLevel, intensity, date: dateTime }));
+                // put newly created item at top
+                const li = renderMoodItem(created);
+                moodListEl.insertBefore(li, moodListEl.firstChild);
+                // reset to defaults
+                intensityInput.value = 5; intensityValue.textContent = '5';
+                moodDate.valueAsDate = new Date();
+                // briefly show status then clear
+                setTimeout(()=> saveStatus.textContent = '', 2200);
+            } else {
+                const body = await res.text().catch(()=>null);
+                saveStatus.textContent = 'Save failed';
+                console.error('Save failed', res.status, body);
+            }
+        } catch (err) {
+            saveStatus.textContent = 'Error';
+            console.error('Error saving mood', err);
+        }
     }
 
     // Event wiring
@@ -302,17 +302,17 @@
 
     // Keyboard accessibility: Arrow keys to switch moods
     document.addEventListener('keydown', (e) => {
-      const idx = MOODS.findIndex(m => m.key === selectedMood);
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        selectedMood = MOODS[(idx + 1) % MOODS.length].key;
-        updateSelectedUI();
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        selectedMood = MOODS[(idx - 1 + MOODS.length) % MOODS.length].key;
-        updateSelectedUI();
-      } else if (e.key === 'Enter') {
-        // Enter saves
-        saveMood();
-      }
+        const idx = MOODS.findIndex(m => m.key === selectedMood);
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            selectedMood = MOODS[(idx + 1) % MOODS.length].key;
+            updateSelectedUI();
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            selectedMood = MOODS[(idx - 1 + MOODS.length) % MOODS.length].key;
+            updateSelectedUI();
+        } else if (e.key === 'Enter') {
+            // Enter saves
+            saveMood();
+        }
     });
 </script>
 </body>

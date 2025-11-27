@@ -61,18 +61,18 @@
                 const goals = await response.json();
                 const list = document.getElementById('goalList');
                 list.innerHTML = goals.map(goal => `
-                    <li class="goal-item ${goal.status === 'completed' ? 'completed' : ''}">
-                        <div class="goal-content">
-                            <h3>${goal.title}</h3>
-                            <p>${goal.description || ''}</p>
-                            <div class="goal-meta">Target: ${goal.targetDate}</div>
-                        </div>
-                        <div class="goal-actions" style="display:flex; gap:0.5rem;">
-                            ${goal.status !== 'completed' ? `<button onclick="markCompleted(${goal.id})">Complete</button>` : ''}
-                            <button style="background-color: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="deleteGoal(${goal.id})">Delete</button>
-                        </div>
-                    </li>
-                `).join('');
+                        <li class="goal-item ${goal.status === 'completed' ? 'completed' : ''}">
+                            <div class="goal-content">
+                                <h3>${goal.title}</h3>
+                                <p>${goal.description || ''}</p>
+                                <div class="goal-meta">Target: ${goal.targetDate}</div>
+                            </div>
+                            <div class="goal-actions" style="display:flex; gap:0.5rem;">
+                                ${goal.status !== 'completed' ? `<button onclick="markCompleted(${goal.id})">Complete</button>` : ''}
+                                <button style="background-color: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="deleteGoal(${goal.id})">Delete</button>
+                            </div>
+                        </li>
+                    `).join('');
             }
         } catch (error) {
             console.error('Error loading goals:', error);

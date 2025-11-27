@@ -11,16 +11,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+
 @Controller
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
     private final PostService postService;
-    private final CrisisAlertService crisisAlertService;
     private final UserService userService;
     private final UserRepository userRepository;
     private final UserActivityService userActivityService;
@@ -31,8 +29,9 @@ public class AdminController {
     private final HabitRepository habitRepository;
     private final StressRepository stressRepository;
 
-    public AdminController(PostService postService, CrisisAlertService crisisAlertService,
-                           UserService userService, UserRepository userRepository,
+    public AdminController(PostService postService,
+                           UserService userService,
+                           UserRepository userRepository,
                            UserActivityService userActivityService,
                            CheckInService checkInService,
                            MoodRepository moodRepository,
@@ -41,7 +40,6 @@ public class AdminController {
                            HabitRepository habitRepository,
                            StressRepository stressRepository) {
         this.postService = postService;
-        this.crisisAlertService = crisisAlertService;
         this.userService = userService;
         this.userRepository = userRepository;
         this.userActivityService = userActivityService;
@@ -135,46 +133,10 @@ public class AdminController {
         }
         return ResponseEntity.notFound().build();
     }
+
     @GetMapping("/posts")
     public ResponseEntity<List<Post>> getAllPostsAdmin() {
         return ResponseEntity.ok(postService.getAllPosts());
-    }
-
-    @PostMapping("/posts/{id}/resolve")
-    public ResponseEntity<Void> resolveFlag(@PathVariable Long id) {
-        Post post = postService.getPost(id);
-        if (post != null) {
-            post.setFlagged(false);
-            post.setFlagReason(null);
-            postService.updatePost(post);
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
-    @DeleteMapping("/posts/{id}")
-    public ResponseEntity<Void> deletePost(
-            @PathVariable Long id,
-            @RequestParam String reason
-    ) {
-        Post post = postService.getPost(id);
-        if (post != null) {
-            crisisAlertService.createPostDeletionAlert(post.getUser(), reason);
-            postService.deletePost(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-
-
-    @PostMapping("/crisis-check/{userId}")
-    public ResponseEntity<Map<String, String>> runCrisisCheck(@PathVariable Long userId) {
-        User user = userService.findById(userId).orElse(null);
-        if (user != null) {
-            crisisAlertService.analyzeUserRisk(user);
-            return ResponseEntity.ok(Map.of("message", "Crisis check completed for user " + userId));
-        }
-        return ResponseEntity.notFound().build();
     }
 
     // Global Settings - Check-in Questions
@@ -289,11 +251,9 @@ public class AdminController {
         return "\"" + data.replace("\"", "\"\"") + "\"";
     }
 
-
     // Database Backup (Mock)
     @GetMapping("/backup")
     public ResponseEntity<Map<String, String>> triggerBackup() {
-        // In a real app, this would dump the DB. Here we mock it.
         return ResponseEntity
                 .ok(Map.of("message", "Database backup triggered successfully. Backup file created at /backups/db-"
                         + System.currentTimeMillis() + ".sql"));
@@ -323,19 +283,15 @@ public class AdminController {
         habitRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/board")
     public String boardPage(Model model) {
         model.addAttribute("posts", postService.getAllPosts());
         return "admin/board";
     }
 
-
     @GetMapping("/flagged")
     public String flaggedPage() {
-        return "admin/flagged"; // loads templates/admin/flagged.html
+        return "admin/flagged";
     }
-
 }
-
-
-

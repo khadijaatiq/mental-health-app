@@ -4,30 +4,30 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Getter
 @Setter
+@Getter
 @Entity
-@Table(name = "moods")
-public class Mood {
+@Table(name = "alerts")
+public class Alert {
+
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    private String moodLevel;
-    private LocalDateTime date;
-    private int intensity;
+
+    private String reason;
+
     private LocalDateTime createdAt;
+    private String severity;
 
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
-        if (this.date == null)
-            this.date = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -46,28 +46,20 @@ public class Mood {
         this.user = user;
     }
 
-    public String getMoodLevel() {
-        return moodLevel;
+    public String getReason() {
+        return reason;
     }
 
-    public void setMoodLevel(String moodLevel) {
-        this.moodLevel = moodLevel;
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
-    public LocalDateTime getDate() {
-        return date;
+    public String getSeverity() {
+        return severity;
     }
 
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }
-
-    public int getIntensity() {
-        return intensity;
-    }
-
-    public void setIntensity(int intensity) {
-        this.intensity = intensity;
+    public void setSeverity(String severity) {
+        this.severity = severity;
     }
 
     public LocalDateTime getCreatedAt() {

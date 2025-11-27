@@ -23,4 +23,9 @@ public class ResourceCategory {
     }
     public ResourceCategory() {
     }
+    public String getResources()
+    {
+        return name;
+    }
+
 }
