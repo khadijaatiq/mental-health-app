@@ -13,9 +13,11 @@ import java.util.List;
 public class CrisisAlertService {
 
     private final CrisisAlertRepository crisisAlertRepository;
+    private final NotificationService notificationService;
 
-    public CrisisAlertService(CrisisAlertRepository crisisAlertRepository) {
+    public CrisisAlertService(CrisisAlertRepository crisisAlertRepository, NotificationService notificationService) {
         this.crisisAlertRepository = crisisAlertRepository;
+        this.notificationService = notificationService;
     }
 
     public CrisisAlert createAlert(User user, Journal journal) {
@@ -49,6 +51,16 @@ public class CrisisAlertService {
         alert.setCrisisConfirmed(true);
         alert.setSeverity("CRISIS");
         alert.setAdminMessage(adminMessage);
+        User user = alert.getUser();
+        String message = "You have been identified as in crisis. Please consider contacting support resources. Admin message: " + adminMessage;
+        notificationService.createAndDeliver(
+                user.getId(),
+                "CRISIS",
+                message,
+                "/crisis",          // link to crisis page or resources
+                true,
+                user.getEmail()
+        );
 
         return crisisAlertRepository.save(alert);
     }

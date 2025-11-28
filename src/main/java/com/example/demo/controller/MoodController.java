@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/moods")
@@ -59,6 +60,20 @@ public class MoodController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/recent")
+    public ResponseEntity<List<MoodDTO>> getRecentMoods(@AuthenticationPrincipal User user) {
+        LocalDateTime end = LocalDateTime.now();
+        LocalDateTime start = end.minusDays(7); // last 7 days
+
+        List<Mood> moods = moodService.getMoodsByUserAndDateRange(user, start, end);
+        List<MoodDTO> moodDTOs = moods.stream()
+                .map(MoodDTO::fromEntity)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(moodDTOs);
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal User user) {

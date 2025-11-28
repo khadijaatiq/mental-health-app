@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.auth.LoginRequest;
 import com.example.demo.auth.LoginResponse;
 import com.example.demo.model.User;
+import com.example.demo.service.NotificationService;
 import com.example.demo.service.UserService;
 import com.example.demo.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +21,13 @@ import java.util.Set;
 public class UserController {
 
     private final UserService userService;
+    private final NotificationService notifService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     @Autowired
-    public UserController(UserService userService, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public UserController(UserService userService, NotificationService notifService, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
         this.userService = userService;
+        this.notifService = notifService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
     }
@@ -54,6 +57,7 @@ public class UserController {
         String token = jwtUtil.generateToken(userDetails);
         String[] roles = userDetails.getAuthorities().stream()
                 .map(a -> a.getAuthority()).toArray(String[]::new);
+
 
         return ResponseEntity.ok(new LoginResponse(token, userDetails.getUsername(), roles));
     }

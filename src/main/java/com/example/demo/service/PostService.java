@@ -15,14 +15,13 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final NotificationRepository notificationRepository;
+    private final NotificationService notificationService;
     private final UserActivityService userActivityService;
 
-    public PostService(PostRepository postRepository,
-                       NotificationRepository notificationRepository,
+    public PostService(PostRepository postRepository, NotificationService notificationService,
                        UserActivityService userActivityService) {
         this.postRepository = postRepository;
-        this.notificationRepository = notificationRepository;
+        this.notificationService = notificationService;
         this.userActivityService = userActivityService;
     }
 
@@ -84,26 +83,30 @@ public class PostService {
      */
     @Transactional
     public void deletePostAsAdmin(Long postId, User admin, String reason) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("Post not found"));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
         User owner = post.getUser();
 
-        // Delete post
+        // Delete the post
         postRepository.delete(post);
 
-        // Create notification for the owner
-        Notification n = new Notification();
-        n.setUser(owner);
-        n.setMessage(String.format("Your post (id=%d) was removed by an administrator. Reason: %s", postId, reason));
-        n.setCreatedAt(LocalDateTime.now());
-        n.setSent(false);
-        notificationRepository.save(n);
+        // Send notification via NotificationService
+        String message = String.format("Your post (id=%d) was removed by an administrator. Reason: %s", postId, reason);
+        notificationService.createAndDeliver(
+                owner.getId(),
+                "FLAG",          // type can be FLAG or ADMIN_ACTION
+                message,
+                null,            // no link in this example, or you can add one to the post list page
+                true,            // send email if offline
+                owner.getEmail() // email address
+        );
 
-        // Log admin action (optional)
+        // Log admin action if needed
         if (admin != null && userActivityService != null) {
             userActivityService.logActivity(admin, "POST_DELETED_BY_ADMIN", "Deleted post ID: " + postId + " Reason: " + reason);
         }
     }
-
 
 }
 //remove useractivity service if it doesnt look good

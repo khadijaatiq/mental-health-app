@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.MoodDTO;
 import com.example.demo.model.Mood;
 import com.example.demo.model.User;
 import com.example.demo.repository.MoodRepository;
@@ -14,10 +15,12 @@ import java.util.stream.Collectors;
 public class MoodService {
 
     private final MoodRepository moodRepository;
+    private final UserService userService;
 
     @Autowired
-    public MoodService(MoodRepository moodRepository) {
+    public MoodService(MoodRepository moodRepository, UserService userService) {
         this.moodRepository = moodRepository;
+        this.userService = userService;
     }
 
     public Mood createMood(Mood mood) {
@@ -45,6 +48,7 @@ public class MoodService {
     public Double getAverageMoodIntensity(User user, LocalDateTime start, LocalDateTime end) {
         return moodRepository.getAverageIntensity(user, start, end);
     }
+
 
     public Map<String, Long> getMoodDistribution(User user) {
         List<Object[]> results = moodRepository.countMoodsByUser(user);

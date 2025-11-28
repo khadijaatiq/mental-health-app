@@ -190,13 +190,8 @@
     }
 
     // Load moods (paged)
-    async function loadMoods(reset = true) {
-        if (reset) {
-            page = 0;
-            moodListEl.innerHTML = '';
-        }
-        const offset = page * PAGE_SIZE;
-        const url = `/api/moods?offset=${offset}&limit=${PAGE_SIZE}`;
+    async function loadRecentMoods() {
+        const url = '/api/moods/recent';
         try {
             const headers = {};
             const jwt = getJwt();
@@ -204,29 +199,15 @@
 
             const res = await fetch(url, { headers });
             if (!res.ok) {
-                // fallback: try without paging (some backends may not support offset/limit)
-                if (reset) {
-                    const fallback = await fetch('/api/moods', { headers });
-                    if (fallback.ok) {
-                        const data = await fallback.json();
-                        renderMoodsArray(data.slice(0, PAGE_SIZE));
-                        page = 0;
-                        return;
-                    }
-                }
-                console.warn('Could not load moods', res.status);
+                console.warn('Could not load recent moods', res.status);
                 return;
             }
             const data = await res.json();
             if (!Array.isArray(data)) return;
             renderMoodsArray(data);
-            if (data.length < PAGE_SIZE) {
-                loadMoreBtn.style.display = 'none';
-            } else {
-                loadMoreBtn.style.display = 'inline-flex';
-            }
+            loadMoreBtn.style.display = 'none'; // no pagination needed for recent moods
         } catch (err) {
-            console.error('Error loading moods', err);
+            console.error('Error loading recent moods', err);
         }
     }
 
@@ -292,7 +273,7 @@
 
     // Event wiring
     saveBtn.addEventListener('click', (e) => { e.preventDefault(); saveMood(); });
-    loadMoreBtn.addEventListener('click', () => loadMoods(false));
+    loadMoreBtn.addEventListener('click', () => loadRecentMoods(false));
 
     // Init UI
     renderMoodButtons();

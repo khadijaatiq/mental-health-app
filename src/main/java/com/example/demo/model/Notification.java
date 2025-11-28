@@ -4,97 +4,30 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
-@Setter
-@Getter
 @Entity
-@Table(name = "notification")
+@Getter
+@Setter
+@Table(name = "notifications")
 public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    private String type; // CRISIS, REMINDER, FLAG
+
+    @Column(columnDefinition = "TEXT")
     private String message;
 
-    private String type; // e.g., "REMINDER", "WARNING", "INFO"
+    private String link;
 
-    private LocalDateTime scheduledTime;
+    private boolean isRead = false;
 
-    private boolean sent;
-    private LocalDateTime createdAt; // NEW
-
-    @PrePersist
-    public void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    public Notification() {
-    }
-
-    public Notification(String message, String type, LocalDateTime scheduledTime, boolean sent) {
-        this.message = message;
-        this.type = type;
-        this.scheduledTime = scheduledTime;
-        this.sent = sent;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public LocalDateTime getScheduledTime() {
-        return scheduledTime;
-    }
-
-    public void setScheduledTime(LocalDateTime scheduledTime) {
-        this.scheduledTime = scheduledTime;
-    }
-
-    public boolean isSent() {
-        return sent;
-    }
-
-    public void setSent(boolean sent) {
-        this.sent = sent;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    private Instant createdAt = Instant.now();
 }

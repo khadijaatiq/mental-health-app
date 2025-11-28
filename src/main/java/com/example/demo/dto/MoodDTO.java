@@ -1,5 +1,7 @@
 package com.example.demo.dto;
 
+import com.example.demo.model.Mood;
+
 import java.time.LocalDateTime;
 
 public class MoodDTO {
@@ -17,6 +19,15 @@ public class MoodDTO {
         this.moodLevel = moodLevel;
         this.intensity = intensity;
         this.date = date;
+    }
+    public static MoodDTO fromEntity(Mood mood) {
+        if (mood == null) return null;
+        return new MoodDTO(
+                mood.getId(),
+                mood.getMoodLevel(),
+                mood.getIntensity(),
+                mood.getDate()
+        );
     }
 
     public Long getId() {
