@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.CrisisAlertDTO;
+import com.example.demo.dto.crisisAlertDTO;
 import com.example.demo.model.CrisisAlert;
 import com.example.demo.service.CrisisAlertService;
 import org.springframework.http.ResponseEntity;
@@ -33,10 +33,10 @@ public class CrisisAlertController {
 
     @GetMapping("/api/alerts")
     @ResponseBody
-    public List<CrisisAlertDTO> getAlerts() {
+    public List<crisisAlertDTO> getAlerts() {
         return crisisAlertService.getUnresolvedAlerts()
                 .stream()
-                .map(a -> new CrisisAlertDTO(
+                .map(a -> new crisisAlertDTO(
                         a.getId(),
                         a.getMessage(),
                         a.getCreatedAt().toString(),

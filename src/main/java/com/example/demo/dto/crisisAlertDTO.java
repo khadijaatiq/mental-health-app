@@ -1,6 +1,6 @@
 package com.example.demo.dto;
 
-public class CrisisAlertDTO {
+public class crisisAlertDTO {
 
     private Long id;
     private String message;
@@ -9,7 +9,7 @@ public class CrisisAlertDTO {
     private String entryText;
     private boolean crisisConfirmed;
 
-    public CrisisAlertDTO(Long id, String message, String createdAt, String username, String entryText, boolean crisisConfirmed) {
+    public crisisAlertDTO(Long id, String message, String createdAt, String username, String entryText, boolean crisisConfirmed) {
         this.id = id;
         this.message = message;
         this.createdAt = createdAt;

@@ -1,190 +1,260 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html lang="en">
 <head>
     <title>Register - MindTrack</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/users.css">
     <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+        /* Register page specific styles */
+        .register-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            padding: 2rem;
         }
 
-        .container {
-            background-color: var(--surface);
+        .register-container {
+            background: var(--surface);
             padding: 2.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
             width: 100%;
-            max-width: 400px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 450px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
         }
 
-        h1 {
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .register-header {
             text-align: center;
             margin-bottom: 2rem;
+        }
+
+        .register-logo {
+            font-size: 2rem;
             font-weight: 700;
-            background: linear-gradient(to right, #818cf8, #c084fc);
+            background: var(--gradient-primary);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
             margin-bottom: 0.5rem;
+        }
+
+        .register-subtitle {
             color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .register-form .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .register-form label {
+            color: var(--text-secondary);
             font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
         }
 
-        input {
+        .register-form input {
             width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border: 1px solid #334155;
-            background-color: #0f172a;
-            color: white;
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+            background: var(--bg);
+            color: var(--text);
             font-size: 1rem;
-            transition: border-color 0.2s;
-            box-sizing: border-box;
+            transition: all var(--transition-fast);
         }
 
-        input:focus {
+        .register-form input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 0 3px var(--primary-glow);
         }
 
-        button {
+        .register-form input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .register-form button {
             width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
+            padding: 0.875rem;
+            margin-top: 0.5rem;
+            background: var(--gradient-primary);
             border: none;
-            background-color: var(--primary);
-            color: white;
+            border-radius: var(--radius-md);
+            color: var(--text);
             font-weight: 600;
             font-size: 1rem;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all var(--transition-fast);
         }
 
-        button:hover {
-            background-color: var(--primary-dark);
+        .register-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            filter: brightness(1.1);
         }
 
-        .footer {
-            margin-top: 1.5rem;
+        .register-footer {
+            margin-top: 1.75rem;
             text-align: center;
-            font-size: 0.875rem;
+            font-size: 0.9rem;
             color: var(--text-muted);
         }
 
-        .footer a {
-            color: var(--primary);
+        .register-footer a {
+            color: var(--primary-light);
             text-decoration: none;
+            font-weight: 500;
         }
 
-        .footer a:hover {
+        .register-footer a:hover {
             text-decoration: underline;
         }
 
-        .error {
-            color: #ef4444;
+        .error-message {
+            color: var(--danger);
             text-align: center;
             margin-bottom: 1rem;
             font-size: 0.875rem;
+            padding: 0.75rem;
+            background: var(--danger-light);
+            border-radius: var(--radius-md);
             display: none;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        .optional-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Decorative elements */
+        .decoration {
+            position: fixed;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            opacity: 0.05;
+            pointer-events: none;
+        }
+
+        .decoration-1 {
+            width: 400px;
+            height: 400px;
+            top: -100px;
+            right: -100px;
+        }
+
+        .decoration-2 {
+            width: 300px;
+            height: 300px;
+            bottom: -50px;
+            left: -50px;
         }
     </style>
 </head>
 
 <body>
-<div class="container">
-    <h1>Create Account</h1>
-    <div id="errorMessage" class="error">Registration failed</div>
-    <form id="registerForm">
-        <div class="form-group">
-            <label for="name">Full Name</label>
-            <input type="text" id="name" name="name" required>
+    <!-- Decorative background elements -->
+    <div class="decoration decoration-1"></div>
+    <div class="decoration decoration-2"></div>
+
+    <div class="register-wrapper">
+        <div class="register-container">
+            <div class="register-header">
+                <div class="register-logo">MindTrack</div>
+                <p class="register-subtitle">Begin your wellness journey today</p>
+            </div>
+
+            <div id="errorMessage" class="error-message">Registration failed</div>
+
+            <form id="registerForm" class="register-form">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Create a password (min. 8 characters)" required minlength="8">
+                </div>
+                <div class="form-group">
+                    <label for="adminCode">Admin Code</label>
+                    <input type="text" id="adminCode" name="adminCode" placeholder="Leave empty if not admin">
+                    <p class="optional-hint">Only enter if you have an admin access code</p>
+                </div>
+                <button type="submit">Create Account</button>
+            </form>
+
+            <div class="register-footer">
+                Already have an account? <a href="/login">Sign in</a>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required>
-        </div>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required minlength="8">
-        </div>
-        <div class="form-group">
-            <label for="adminCode">Admin Code (Optional)</label>
-            <input type="text" id="adminCode" name="adminCode" placeholder="Enter code for admin access">
-        </div>
-        <button type="submit">Sign Up</button>
-    </form>
-    <div class="footer">
-        Already have an account? <a href="/login">Sign in</a>
     </div>
-</div>
 
-<script>
-    document.getElementById('registerForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const name = document.getElementById('name').value;
-        const username = document.getElementById('username').value;
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const adminCode = document.getElementById('adminCode').value;
-        const errorDiv = document.getElementById('errorMessage');
-        if (password.length < 8) {
-            errorDiv.textContent = "Password must be at least 8 characters long.";
-            errorDiv.style.display = 'block';
-            return;
-        }
-        try {
-            const response = await fetch('/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, username, email, password, adminCode })
-            });
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const adminCode = document.getElementById('adminCode').value;
+            const errorDiv = document.getElementById('errorMessage');
 
-            if (response.ok) {
-                window.location.href = '/login';
-            } else {
-                const data = await response.json();
-                errorDiv.textContent = data.error || 'Registration failed';
-                errorDiv.style.display = 'block';
+            if (password.length < 8) {
+                errorDiv.textContent = "Password must be at least 8 characters long.";
+                errorDiv.classList.add('visible');
+                return;
             }
-        } catch (error) {
-            errorDiv.textContent = 'An error occurred';
-            errorDiv.style.display = 'block';
-        }
-    });
-</script>
-</body>
 
+            try {
+                const response = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, username, email, password, adminCode })
+                });
+
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    const data = await response.json();
+                    errorDiv.textContent = data.error || 'Registration failed';
+                    errorDiv.classList.add('visible');
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.classList.add('visible');
+            }
+        });
+    </script>
+</body>
 </html>

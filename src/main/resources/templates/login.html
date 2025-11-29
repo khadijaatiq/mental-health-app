@@ -1,180 +1,243 @@
 <!DOCTYPE html>
-
+<html lang="en">
 <head>
     <title>Login - MindTrack</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/users.css">
     <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+        /* Login page specific styles */
+        .login-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            padding: 2rem;
         }
 
-        .container {
-            background-color: var(--surface);
+        .login-container {
+            background: var(--surface);
             padding: 2.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
             width: 100%;
-            max-width: 400px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 420px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
         }
 
-        h1 {
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .login-header {
             text-align: center;
             margin-bottom: 2rem;
+        }
+
+        .login-logo {
+            font-size: 2rem;
             font-weight: 700;
-            background: linear-gradient(to right, #818cf8, #c084fc);
+            background: var(--gradient-primary);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
             margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
             color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .login-form .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .login-form label {
+            color: var(--text-secondary);
             font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
         }
 
-        input {
+        .login-form input {
             width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border: 1px solid #334155;
-            background-color: #0f172a;
-            color: white;
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+            background: var(--bg);
+            color: var(--text);
             font-size: 1rem;
-            transition: border-color 0.2s;
-            box-sizing: border-box;
+            transition: all var(--transition-fast);
         }
 
-        input:focus {
+        .login-form input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 0 3px var(--primary-glow);
         }
 
-        button {
+        .login-form input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .login-form button {
             width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
+            padding: 0.875rem;
+            margin-top: 0.5rem;
+            background: var(--gradient-primary);
             border: none;
-            background-color: var(--primary);
-            color: white;
+            border-radius: var(--radius-md);
+            color: var(--text);
             font-weight: 600;
             font-size: 1rem;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all var(--transition-fast);
         }
 
-        button:hover {
-            background-color: var(--primary-dark);
+        .login-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            filter: brightness(1.1);
         }
 
-        .footer {
-            margin-top: 1.5rem;
+        .login-footer {
+            margin-top: 1.75rem;
             text-align: center;
-            font-size: 0.875rem;
+            font-size: 0.9rem;
             color: var(--text-muted);
         }
 
-        .footer a {
-            color: var(--primary);
+        .login-footer a {
+            color: var(--primary-light);
             text-decoration: none;
+            font-weight: 500;
         }
 
-        .footer a:hover {
+        .login-footer a:hover {
             text-decoration: underline;
         }
 
-        .error {
-            color: #ef4444;
+        .error-message {
+            color: var(--danger);
             text-align: center;
             margin-bottom: 1rem;
             font-size: 0.875rem;
+            padding: 0.75rem;
+            background: var(--danger-light);
+            border-radius: var(--radius-md);
             display: none;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        /* Decorative elements */
+        .decoration {
+            position: fixed;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            opacity: 0.05;
+            pointer-events: none;
+        }
+
+        .decoration-1 {
+            width: 400px;
+            height: 400px;
+            top: -100px;
+            right: -100px;
+        }
+
+        .decoration-2 {
+            width: 300px;
+            height: 300px;
+            bottom: -50px;
+            left: -50px;
         }
     </style>
 </head>
 
 <body>
-<div class="container">
-    <h1>MindTrack</h1>
-    <div id="errorMessage" class="error">Invalid credentials</div>
-    <form id="loginForm">
-        <div class="form-group">
-            <label for="username">Username or Email</label>
-            <input type="text" id="username" name="username" required>
+    <!-- Decorative background elements -->
+    <div class="decoration decoration-1"></div>
+    <div class="decoration decoration-2"></div>
+
+    <div class="login-wrapper">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-logo">MindTrack</div>
+                <p class="login-subtitle">Your journey to wellness starts here</p>
+            </div>
+
+            <div id="errorMessage" class="error-message">Invalid credentials</div>
+
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">Username or Email</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit">Sign In</button>
+            </form>
+
+            <div class="login-footer">
+                Don't have an account? <a href="/register">Create one</a>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <button type="submit">Sign In</button>
-    </form>
-    <div class="footer">
-        Don't have an account? <a href="/register">Sign up</a>
     </div>
-</div>
-<script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const errorDiv = document.getElementById('errorMessage');
 
-        try {
-            const response = await fetch('/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            });
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
 
-            const data = await response.json();
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
 
-            if (response.ok) {
-                // save token
-                document.cookie = `JWT=${data.token}; path=/; SameSite=Lax;`;
+                const data = await response.json();
 
-                // redirect based on role
-                if (data.admin === true) {
-                    window.location.href = '/admin/dashboard';
+                if (response.ok) {
+                    // save token
+                    document.cookie = `JWT=${data.token}; path=/; SameSite=Lax;`;
+
+                    // redirect based on role
+                    if (data.admin === true) {
+                        window.location.href = '/admin/dashboard';
+                    } else {
+                        window.location.href = '/dashboard';
+                    }
+
                 } else {
-                    window.location.href = '/dashboard';
+                    errorDiv.textContent = data.error || 'Login failed';
+                    errorDiv.classList.add('visible');
                 }
 
-            } else {
-                errorDiv.textContent = data.error || 'Login failed';
-                errorDiv.style.display = 'block';
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.classList.add('visible');
             }
-
-        } catch (error) {
-            errorDiv.textContent = 'An error occurred';
-            errorDiv.style.display = 'block';
-        }
-
-    });
-</script>
-
-
+        });
+    </script>
+</body>
+</html>
