@@ -6,6 +6,7 @@ import com.example.demo.model.User;
 import com.example.demo.service.PostService;
 import com.example.demo.service.UserActivityService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -92,15 +93,15 @@ public class PostController {
         return ResponseEntity.notFound().build();
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal User user) {
-        Post post = postService.getPost(id);
-        if (post != null && post.getUser().getId().equals(user.getId())) {
-            postService.deletePost(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @DeleteMapping("/admin/{id}")
+//    public ResponseEntity<Void> adminDeletePost(@PathVariable Long id, @RequestBody Map<String,String> body,
+//                                                @AuthenticationPrincipal User adminUser) {
+//        String reason = body.getOrDefault("reason", "Removed by admin");
+//        postService.deletePostAsAdmin(id, adminUser, reason);
+//        return ResponseEntity.noContent().build();
+//    }
+
 
     @PostMapping("/{id}/flag")
     public ResponseEntity<Void> flagPost(@PathVariable Long id, @RequestBody Map<String, String> body,

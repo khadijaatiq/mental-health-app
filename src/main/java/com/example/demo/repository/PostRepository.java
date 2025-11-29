@@ -15,7 +15,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByAnonymous(boolean anonymous);
     List<Post> findAllByOrderByCreatedAtDesc();
     List<Post> findByUserOrderByCreatedAtDesc(User user);
-    List<Post> findByCreatedAtAfter(LocalDateTime date);
-    List<Post> findByUserAndCreatedAtAfterOrderByCreatedAtDesc(User user, LocalDateTime date);
-    // List<Post> findByUserOrderByCreatedAtDesc(User user, LocalDateTime createdAt);
+    List<Post> findAllByDeletedFalseOrderByCreatedAtDesc();
+    List<Post> findByUserAndDeletedFalseOrderByCreatedAtDesc(User user);
+// List<Post> findByUserOrderByCreatedAtDesc(User user, LocalDateTime createdAt);
 }

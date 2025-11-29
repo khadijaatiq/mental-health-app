@@ -1,21 +1,18 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html lang="en">
 <head>
-    <title>Admin - Board Moderation - MindTrack</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Manage Posts</title>
     <link rel="stylesheet" href="/css/admin-dashboard.css">
 </head>
-
 <body>
-
 <nav class="navbar">
     <div class="logo">MindTrack Admin</div>
     <div class="nav-links">
         <a href="/admin/dashboard">Dashboard</a>
         <a href="/admin/resources">Resources</a>
         <a href="/admin/board">Board</a>
+        <a href="/admin/moods">Moods</a>
         <a href="/admin/crisis">Crisis</a>
         <a href="/admin/reports">Reports</a>
         <a href="/admin/settings">Settings</a>
@@ -24,19 +21,19 @@
 </nav>
 
 <div class="container">
-
-    <div class="filters">
-        <input type="text" id="searchUser" placeholder="Filter by username..." onkeyup="filterPosts()">
-        <select id="filterReason" onchange="filterPosts()">
-            <option value="">All Reasons</option>
-            <option value="Inappropriate">Inappropriate</option>
-            <option value="Spam">Spam</option>
-            <option value="Harassment">Harassment</option>
-        </select>
-    </div>
-
-    <div id="postList"></div>
-
+    <h2>Manage Posts</h2>
+    <table id="postsTable" class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Content</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 </div>
 
 <script>
@@ -45,118 +42,121 @@
         window.location.href = "/login";
     }
 
-    function getJWT() {
-        return document.cookie
-            .split(";")
-            .map(c => c.trim().split("="))
-            .find(c => c[0] === "JWT")?.[1] || null;
+    function getJwt() {
+        return document.cookie.split("; ")
+            .find(r => r.startsWith("JWT="))
+            ?.split("=")[1];
     }
 
     let allPosts = [];
+    let allUsers = [];
 
-    async function loadFlaggedPosts() {
+    // Load users
+    async function loadUsers() {
         try {
-            const jwt = getJWT();
-            if (!jwt) return;
-
-            const response = await fetch("/api/admin/posts/flagged", {
-                headers: { "Authorization": "Bearer " + jwt }
-            });
-
-            if (response.ok) {
-                allPosts = await response.json();
-                renderPosts(allPosts);
-            }
+            const res = await fetch("/api/admin/users", { credentials: "include" });
+            if (!res.ok) throw new Error("Failed to load users");
+            allUsers = await res.json();
         } catch (err) {
             console.error(err);
+            alert("Error loading users.");
         }
     }
 
-    function renderPosts(posts) {
-        const list = document.getElementById("postList");
+    // Map user_id to username
+    function getUsername(user_id) {
+        const user = allUsers.find(u => Number(u.id) === Number(user_id));
+        return user ? user.username : "Unknown";
+    }
+    function getCreatedAt(post) {
+    if (!post.createdAt && !post.created_at) return "";
+    const rawDate = post.createdAt || post.created_at;
+    const d = new Date(rawDate);
+    return isNaN(d.getTime()) ? rawDate : d.toLocaleString();
+    }
 
-        if (posts.length === 0) {
-            list.innerHTML = `<p style="color: var(--text-muted); text-align:center;">No flagged posts found.</p>`;
-            return;
+    // Load posts
+    async function loadPosts() {
+        try {
+            await loadUsers();
+            const res = await fetch("/api/admin/posts", { credentials: "include" });
+            if (!res.ok) throw new Error("Failed to load posts");
+            allPosts = await res.json();
+            renderPosts(allPosts);
+        } catch (err) {
+            console.error(err);
+            alert("Error loading posts. Please try again.");
         }
-
-        list.innerHTML = posts.map(post => `
-            <div class="post-card">
-                <div class="post-header">
-                    <div>
-                        <strong>${post.user ? post.user.username : "Unknown"}</strong>
-                        ${post.anonymous ? `<span class="badge-warning">Anonymous (Revealed)</span>` : ""}
-                    </div>
-                    <span>${new Date(post.date).toLocaleDateString()}</span>
-                </div>
-
-                <div class="post-content">
-                    ${post.content}
-                    <div class="flag-reason"><strong>Flagged:</strong> ${post.flagReason || "No reason"}</div>
-                </div>
-
-                <div class="actions">
-                    <button class="btn-success" onclick="resolvePost(${post.id})">Keep</button>
-                    <button class="btn-danger" onclick="deletePost(${post.id})">Delete</button>
-                    <button class="btn-warning" onclick="blockUser(${post.user?.id || 0})">Block User</button>
-                </div>
-            </div>
-        `).join("");
     }
 
-    function filterPosts() {
-        const query = document.getElementById("searchUser").value.toLowerCase();
-        const reason = document.getElementById("filterReason").value.toLowerCase();
-
-        const filtered = allPosts.filter(p =>
-            (p.user?.username || "").toLowerCase().includes(query) &&
-            (p.flagReason || "").toLowerCase().includes(reason)
-        );
-
-        renderPosts(filtered);
+    // Render posts
+function renderPosts(posts) {
+    const tbody = document.querySelector("#postsTable tbody");
+    if (posts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:gray;">No posts found.</td></tr>`;
+        return;
     }
 
-    async function resolvePost(id) {
-        if (!confirm("Unflag this post?")) return;
+    tbody.innerHTML = posts.map(p => {
+        let createdDate = p.createdAt ? new Date(p.createdAt).toLocaleString() : "";
+        return `
+            <tr>
+                <td>${p.id}</td>
+                <td>${p.user ? p.user.username : "Unknown"}</td>
+                <td>${p.content || ""}</td>
+                <td>${createdDate}</td>
+                <td>
+                    <button class="btn-flag" onclick="flagPost(${p.id})">
+                        ${p.flagged ? "Flagged" : "Flag"}
+                    </button>
+                    <button class="btn-danger" onclick="deletePost(${p.id})">Delete</button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
 
-        const jwt = getJWT();
-        await fetch(`/api/admin/posts/${id}/resolve`, {
-            method: "POST",
-            headers: { "Authorization": "Bearer " + jwt }
-        });
+async function flagPost(id) {
+    const reason = prompt("Enter flag reason:");
+    if (!reason) return;
 
-        loadFlaggedPosts();
-    }
+    await fetch(`/api/admin/posts/${id}/flag`, {
+        method: "PATCH",
+        headers: {
+            "Authorization": "Bearer " + getJwt(),
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ reason })
+    });
 
+    loadPosts();
+}
+
+
+
+
+    // Delete post
     async function deletePost(id) {
-        if (!confirm("Delete this post permanently?")) return;
+        const reason = prompt("Enter deletion reason:");
+        if (!reason) return;
 
-        const jwt = getJWT();
-        await fetch(`/api/admin/posts/${id}`, {
-            method: "DELETE",
-            headers: { "Authorization": "Bearer " + jwt }
-        });
-
-        loadFlaggedPosts();
+        try {
+            const res = await fetch(`/api/admin/posts/${id}`, {
+                method: "DELETE",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ reason })
+            });
+            if (!res.ok) throw new Error("Failed to delete post");
+            loadPosts();
+        } catch (err) {
+            console.error(err);
+            alert("Error deleting post");
+        }
     }
 
-    async function blockUser(userId) {
-        if (!userId || !confirm("Block this user?")) return;
-
-        const jwt = getJWT();
-        await fetch(`/api/admin/users/${userId}/block`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + jwt
-            },
-            body: JSON.stringify({ blocked: true })
-        });
-
-        alert("User blocked.");
-    }
-
-    loadFlaggedPosts();
+    // Initial load
+    loadPosts();
 </script>
 
 </body>

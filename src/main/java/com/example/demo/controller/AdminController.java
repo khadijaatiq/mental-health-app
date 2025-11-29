@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.email.EmailService;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import com.example.demo.service.*;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +30,7 @@ public class AdminController {
     private final GoalRepository goalRepository;
     private final HabitRepository habitRepository;
     private final StressRepository stressRepository;
-
+    private final EmailService emailService;
     public AdminController(PostService postService,
                            UserService userService,
                            UserRepository userRepository,
@@ -38,7 +40,7 @@ public class AdminController {
                            JournalRepository journalRepository,
                            GoalRepository goalRepository,
                            HabitRepository habitRepository,
-                           StressRepository stressRepository) {
+                           StressRepository stressRepository, EmailService emailService) {
         this.postService = postService;
         this.userService = userService;
         this.userRepository = userRepository;
@@ -49,6 +51,7 @@ public class AdminController {
         this.goalRepository = goalRepository;
         this.habitRepository = habitRepository;
         this.stressRepository = stressRepository;
+        this.emailService = emailService;
     }
 
     @GetMapping("/stats")
@@ -113,6 +116,11 @@ public class AdminController {
     public ResponseEntity<List<UserActivity>> getRecentActivity() {
         return ResponseEntity.ok(userActivityService.getRecentActivities());
     }
+    @GetMapping("/board/posts")
+    @ResponseBody
+    public ResponseEntity<List<Post>> getBoardPosts() {
+        return ResponseEntity.ok(postService.getAllPosts());
+    }
 
     @GetMapping("/posts/flagged")
     public ResponseEntity<List<Post>> getFlaggedPosts() {
@@ -121,17 +129,46 @@ public class AdminController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(flaggedPosts);
     }
-
     @PatchMapping("/posts/{id}/flag")
     public ResponseEntity<Post> flagPost(@PathVariable Long id, @RequestBody Map<String, String> body) {
         String reason = body.get("reason");
         Post post = postService.getPost(id);
-        if (post != null) {
-            post.setFlagged(true);
-            post.setFlagReason(reason);
-            return ResponseEntity.ok(postService.updatePost(post));
+
+        if (post == null) return ResponseEntity.notFound().build();
+
+        post.setFlagged(true);
+        post.setFlagReason(reason);
+        Post updatedPost = postService.updatePost(post);
+
+        // Send email notification to the user
+        if (post.getUser() != null) {
+            String subject = "Your post has been flagged on MindTrack";
+            String htmlBody = "<p>Hi " + post.getUser().getUsername() + ",</p>"
+                    + "<p>Your post with ID <strong>" + post.getId() + "</strong> has been flagged by an admin.</p>"
+                    + "<p><strong>Reason:</strong> " + reason + "</p>"
+                    + "<p>Regards,<br>MindTrack Admin Team</p>";
+
+            emailService.sendEmail(post.getUser().getEmail(), subject, htmlBody);
         }
-        return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(updatedPost);
+    }
+
+
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/posts/{id}")
+    @ResponseBody
+    public ResponseEntity<Void> adminDeletePost(@PathVariable Long id, @RequestBody Map<String,String> body, @AuthenticationPrincipal User adminUser) {
+        String reason = body.getOrDefault("reason", "Removed by admin");
+        postService.deletePostAsAdmin(id, adminUser, reason);
+        return ResponseEntity.noContent().build();
+    }
+    @PostMapping("/posts/{id}/resolve")
+    public ResponseEntity<Post> resolvePost(@PathVariable Long id) {
+        Post updated = postService.unflagPost(id);
+        if (updated == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(updated);
     }
 
     @GetMapping("/posts")
@@ -294,4 +331,5 @@ public class AdminController {
     public String flaggedPage() {
         return "admin/flagged";
     }
-}
+
+    }
