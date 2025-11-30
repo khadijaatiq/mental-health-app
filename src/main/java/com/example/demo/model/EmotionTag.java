@@ -17,7 +17,8 @@ public class EmotionTag {
     @Column(unique = true, nullable = false)
     private String name;
 
-    private String color; // Hex code, e.g., #FF5733
+    @Column(nullable = true)
+    private String color;
 
     @Enumerated(EnumType.STRING)
     private Category category;

@@ -81,48 +81,11 @@
   </div>
 
 
-  <div class="grid-2">
-
-    <!-- Notifications -->
-    <div class="card">
-      <h3>Notifications & Reminders</h3>
-
-      <div class="form-group">
-        <label class="toggle-switch">
-          <input type="checkbox" id="globalReminders" checked>
-          Enable Global Reminders
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label>Default Reminder Time</label>
-        <input type="time" value="09:00">
-      </div>
-
-      <button class="btn-primary" onclick="testNotification()">Send Test Notification</button>
-    </div>
-
-    <!-- System Settings -->
-    <div class="card">
-      <h3>System Maintenance</h3>
-
-      <div class="form-group">
-        <label>Crisis Threshold (Mood Level)</label>
-        <input type="number" value="3" min="1" max="10">
-      </div>
-
-      <div class="form-group" style="display:flex; gap:0.5rem;">
-        <button class="btn-warning" onclick="backupDb()">Backup Database</button>
-        <button class="btn-danger" onclick="cleanupFiles()">Cleanup Temp Files</button>
-      </div>
-    </div>
-
-  </div>
-
     </main>
 </div>
 
 <script>
+
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('active');
   }
@@ -136,49 +99,47 @@
   // Check-in Questions
   // -------------------
 
-  async function loadQuestions() {
-    const response = await fetch('/api/admin/settings/checkin-questions');
+    let questionsArray = [];
 
-    if (response.ok) {
-      const questions = await response.json();
-
-      document.getElementById('questionsList').innerHTML =
-              questions.map(q => `
-              <div class="list-item">
-                  <span>${q}</span>
-                  <button class="btn-danger" style="padding:0.25rem 0.5rem; font-size:0.75rem;"
-                      onclick="removeQuestion('${q}')">X</button>
-              </div>
-          `).join('');
+    async function loadQuestions() {
+        const res = await fetch('/api/admin/questions');
+        if (res.ok) {
+            questionsArray = await res.json();
+            document.getElementById('questionsList').innerHTML = questionsArray.map((q, i) => `
+      <div class="list-item">
+        <span>${q}</span>
+        <button class="btn-danger" style="padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="removeQuestion(${i})">X</button>
+      </div>
+    `).join('');
+        }
     }
-  }
 
-  async function addQuestion() {
-    const input = document.getElementById('newQuestion');
-    if (!input.value) return;
+    async function addQuestion() {
+        const input = document.getElementById('newQuestion');
+        if (!input.value) return;
 
-    await fetch('/api/admin/settings/checkin-questions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: input.value })
-    });
+        await fetch('/api/admin/questions', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ question: input.value.trim() })
+        });
 
-    input.value = '';
-    loadQuestions();
-  }
+        input.value = '';
+        loadQuestions();
+    }
 
-  async function removeQuestion(q) {
-    if (!confirm('Remove this question?')) return;
+    async function removeQuestion(index) {
+        if (!confirm('Remove this question?')) return;
+        const question = questionsArray[index];
 
-    await fetch('/api/admin/settings/checkin-questions', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: q })
-    });
+        await fetch('/api/admin/questions', {
+            method: 'DELETE',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ question })
+        });
 
-    loadQuestions();
-  }
-
+        loadQuestions();
+    }
   // -------------------
   // Emotion Tags
   // -------------------
@@ -205,13 +166,13 @@
 
   async function addTag() {
     const name = document.getElementById('newTag').value;
-    const category = document.getElementById('tagCategory').value;
+    const category = document.getElementById('tagCategory').value.toUpperCase();
     if (!name) return;
 
     await fetch('/api/tags', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, category })
+      body: JSON.stringify({ name: name.trim(), category })
     });
 
     document.getElementById('newTag').value = '';
@@ -225,37 +186,12 @@
     loadTags();
   }
 
-  // -------------------
-  // Notifications
-  // -------------------
-
-  async function testNotification() {
-    await fetch('/api/notifications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: "This is a test notification from Admin Settings.",
-        type: "TEST",
-        scheduledTime: new Date().toISOString()
-      })
-    });
-
-    alert('Test notification sent to your account.');
-  }
 
   // -------------------
   // System
   // -------------------
 
-  async function backupDb() {
-    const res = await fetch('/api/admin/backup');
-    const data = await res.json();
-    alert(data.message);
-  }
 
-  function cleanupFiles() {
-    alert('Cleanup job triggered (Mock).');
-  }
 
   // Init
   loadQuestions();

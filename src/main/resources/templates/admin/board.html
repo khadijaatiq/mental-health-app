@@ -33,7 +33,7 @@
 
     <main class="main-content">
     <h2 class="page-title">Manage Posts</h2>
-    <table id="postsTable" class="table">
+    <table id="postsTable" class="table" width="110%" style="text-align: left">
         <thead>
         <tr>
             <th>ID</th>
@@ -106,47 +106,53 @@
     }
 
     // Render posts
-function renderPosts(posts) {
-    const tbody = document.querySelector("#postsTable tbody");
-    if (posts.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:gray;">No posts found.</td></tr>`;
-        return;
-    }
+    function renderPosts(posts) {
+        const tbody = document.querySelector("#postsTable tbody");
+        if (posts.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:gray;">No posts found.</td></tr>`;
+            return;
+        }
 
-    tbody.innerHTML = posts.map(p => {
-        let createdDate = p.createdAt ? new Date(p.createdAt).toLocaleString() : "";
-        return `
+        tbody.innerHTML = posts.map(p => {
+            let createdDate = getCreatedAt(p);
+            const flagButton = p.flagged
+                ? `<button class="btn-flag" disabled>Flagged</button>`
+                : `<button class="btn-flag" onclick="flagPost(${p.id})">Flag</button>`;
+
+            const deleteButton = p.deleted
+                ? `<button class="btn-danger deleted" disabled>Deleted</button>`
+                : `<button class="btn-danger" onclick="deletePost(${p.id})">Delete</button>`;
+            return `
             <tr>
                 <td>${p.id}</td>
                 <td>${p.user ? p.user.username : "Unknown"}</td>
                 <td>${p.content || ""}</td>
                 <td>${createdDate}</td>
                 <td>
-                    <button class="btn-flag" onclick="flagPost(${p.id})">
-                        ${p.flagged ? "Flagged" : "Flag"}
-                    </button>
-                    <button class="btn-danger" onclick="deletePost(${p.id})">Delete</button>
+                    ${flagButton}
+                    ${deleteButton}
                 </td>
             </tr>
         `;
-    }).join("");
-}
+        }).join("");
+    }
 
-async function flagPost(id) {
-    const reason = prompt("Enter flag reason:");
-    if (!reason) return;
+    async function flagPost(id) {
+        const reason = prompt("Enter flag reason:");
+        if (!reason) return;
 
-    await fetch(`/api/admin/posts/${id}/flag`, {
-        method: "PATCH",
-        headers: {
-            "Authorization": "Bearer " + getJwt(),
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ reason })
-    });
+        const res = await fetch(`/api/admin/posts/${id}/flag`, {
+            method: "PATCH",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-    loadPosts();
-}
+            body: JSON.stringify({ reason })
+        });
+        if (!res.ok) return alert("Failed to flag post");
+        loadPosts();
+    }
 
 
 
@@ -174,6 +180,5 @@ async function flagPost(id) {
     // Initial load
     loadPosts();
 </script>
-
 </body>
 </html>

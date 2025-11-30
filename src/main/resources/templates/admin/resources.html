@@ -167,7 +167,6 @@
         else alert('Failed to delete category');
     }
 
-    // Resources
     async function loadResources() {
         const res = await fetch('/api/resources');
         const resources = await res.json();

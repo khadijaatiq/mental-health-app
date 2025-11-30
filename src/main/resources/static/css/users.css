@@ -1555,6 +1555,12 @@ button:active {
     font-size: 0.875rem;
     margin-top: 0.25rem;
 }
+.resource-item {
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
 
 .no-alerts {
     text-align: center;

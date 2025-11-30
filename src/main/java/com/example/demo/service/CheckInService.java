@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -18,7 +19,7 @@ public class CheckInService {
     private final CheckInRepository checkInRepository;
 
     // Predefined reflection questions
-    private final List<String> questions = Arrays.asList(
+    private final List<String> questions = new ArrayList<>(Arrays.asList(
             "How are you feeling today?",
             "What's one thing you're grateful for?",
             "What challenged you today?",
@@ -29,7 +30,7 @@ public class CheckInService {
             "What's on your mind right now?",
             "What do you need more of in your life?",
             "What's one thing you're looking forward to?"
-    );
+    ));
 
     @Autowired
     public CheckInService(CheckInRepository checkInRepository) {

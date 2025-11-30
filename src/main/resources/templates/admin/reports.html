@@ -7,6 +7,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="/css/users.css">
+    <style>
+
+        .activity-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 1rem;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .activity-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .activity-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .activity-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+
+
+    </style>
 </head>
 
 <body>
@@ -37,88 +78,79 @@
     </aside>
 
     <main class="main-content">
-    <h2 class="page-title">Reports & Analytics</h2>
+        <h2 class="page-title">Reports & Analytics</h2>
 
-    <!-- Stats Cards -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-label">Total Users</div>
-            <div class="stat-value" id="totalUsers">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Total Posts</div>
-            <div class="stat-value" id="totalPosts">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Flagged Posts</div>
-            <div class="stat-value" id="flaggedPosts">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Active Alerts</div>
-            <div class="stat-value" id="activeAlerts">0</div>
-        </div>
-    </div>
-
-    <!-- Charts -->
-    <div class="charts-grid">
-        <!-- Line Chart -->
-        <div class="card">
-            <div class="filters">
-                <h3>Activity Trends</h3>
-                <select id="timeRange" onchange="loadTrends()" style="margin-left: auto;">
-                    <option value="7">Last 7 Days</option>
-                    <option value="14">Last 14 Days</option>
-                    <option value="30">Last 30 Days</option>
-                </select>
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value" id="totalUsers">0</div>
             </div>
-            <div class="chart-wrapper">
-                <canvas id="trendsChart"></canvas>
+            <div class="stat-card">
+                <div class="stat-label">Total Posts</div>
+                <div class="stat-value" id="totalPosts">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Flagged Posts</div>
+                <div class="stat-value" id="flaggedPosts">0</div>
             </div>
         </div>
 
-        <!-- Recent Activity -->
-        <div class="card">
-            <h3>Recent Activity</h3>
-            <div class="activity-list" id="activityList">
-                <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                    Loading...
+        <!-- Charts -->
+        <div class="charts-grid">
+            <!-- Line Chart -->
+            <div class="card">
+                <div class="filters">
+                    <h3>Activity Trends</h3>
+                    <select id="timeRange" onchange="loadTrends()" style="margin-left: auto;">
+                        <option value="7">Last 7 Days</option>
+                        <option value="14">Last 14 Days</option>
+                        <option value="30">Last 30 Days</option>
+                    </select>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="trendsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <h3>Recent Activity</h3>
+                <div class="activity-list" id="activityList">
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        Loading...
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Breakdown Chart -->
-    <div class="card" style="margin-bottom: 2rem;">
-        <h3>Activity Breakdown</h3>
-        <div class="chart-wrapper">
-            <canvas id="breakdownChart"></canvas>
+        <!-- Breakdown Chart -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3>Activity Breakdown</h3>
+            <div class="chart-wrapper">
+                <canvas id="breakdownChart"></canvas>
+            </div>
         </div>
-    </div>
 
-    <!-- Exports -->
-    <div class="card">
-        <h3>Data Exports</h3>
-        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
-            Download system-wide data for analysis or backup purposes.
-        </p>
+        <!-- Exports -->
+        <div class="card">
+            <h3>Data Exports</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                Download system-wide data for analysis or backup purposes.
+            </p>
 
-        <div class="export-section">
-            <button onclick="exportData('system')">Full System Export</button>
-            <button class="btn-success" onclick="exportData('moods')">Mood Logs</button>
-            <button class="btn-danger" onclick="exportData('stress')">Stress Logs</button>
-            <button class="btn-warning" onclick="exportData('users')">User List</button>
+            <div class="export-section">
+                <button onclick="exportData('system')">Full System Export</button>
+                <button class="btn-success" onclick="exportData('moods')">Mood Logs</button>
+                <button class="btn-danger" onclick="exportData('stress')">Stress Logs</button>
+                <button class="btn-warning" onclick="exportData('users')">User List</button>
+            </div>
         </div>
-    </div>
     </main>
 </div>
-
 <script>
     let trendsChart = null;
     let breakdownChart = null;
-
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-    }
 
     function logout() {
         document.cookie = "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -210,7 +242,7 @@
                 plugins: {
                     legend: {
                         labels: {
-                            color: '#f8fafc',
+                            color: '#1e293b',
                             usePointStyle: true,
                             padding: 15
                         }
@@ -391,6 +423,7 @@
         setInterval(loadActivity, 30000);
     });
 </script>
+
 
 </body>
 </html>

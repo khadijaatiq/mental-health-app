@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.model.EmotionTag;
 import com.example.demo.repository.EmotionTagRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,10 @@ public class EmotionTagService {
     }
 
     public void deleteTag(long id) {
-        emotionTagRepository.deleteById(id);
+        if (emotionTagRepository.existsById(id)) {
+            emotionTagRepository.deleteById(id);
+        } else {
+            throw new EntityNotFoundException("Tag not found with id " + id);
+        }
     }
 }

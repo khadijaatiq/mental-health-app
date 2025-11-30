@@ -39,7 +39,7 @@ public class ReminderScheduler {
         this.notifier = notifier;
     }
 
-    /** Runs every day at 9 AM */
+
     @Scheduled(cron = "0 0 9 * * *")
     public void sendDailyReminders() {
 
